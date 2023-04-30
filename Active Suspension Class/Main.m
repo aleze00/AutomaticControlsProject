@@ -38,14 +38,15 @@ x_init = [zs_init-zu_init
 
 %% NOMINAL PLANT PARAMETERS USED TO DESIGN THE CONTROL SYSTEM
 
-ks = 16000;
-kt = 10*ks;
-mu = 45;
-ms = 250;
+ks = 29300;
+kt = 290000;
+mu = 38;
+ms = 395;
 ells = 0.5;
 ellt = 0.10;
 g = 9.81;
-bs = 1000;
+bs = 3000;
+
 
 %% LINEARISATION CONDITIONS
 
@@ -54,9 +55,9 @@ d0 = 0;
 nu0 = [0;0];
 r0 = ells-g*ms/ks;
 w0 = [d0; nu0; r0];
-x0 = [ells-g*ms/ks;
+x0 = [ells-g*ms/ks
     0
-    ellt-g*(ms+mu)/kt;
+    ellt-g*(ms+mu)/kt
     0];
 y0 = [x0(1)
     -g-ks/ms*(x0(1)-ells)-bs/ms*x0(2)+u0/ms+g];
@@ -76,7 +77,7 @@ A = [0 1 0 0;
     a21 a22 a23 0;
     0 0 0 1;
     a41 a42 a43 0];
-[V,Vn,J] = JCF(A)
+%%[V,Vn,J] = JCF(A)
 
 b12 = (mu+ms)/(ms*mu);
 b14 = -1/mu;
