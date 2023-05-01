@@ -77,7 +77,7 @@ A = [0 1 0 0;
     a21 a22 a23 0;
     0 0 0 1;
     a41 a42 a43 0];
-%%[V,Vn,J] = JCF(A)
+[V,Vn,J] = JCF(A)
 
 b12 = (mu+ms)/(ms*mu);
 b14 = -1/mu;
