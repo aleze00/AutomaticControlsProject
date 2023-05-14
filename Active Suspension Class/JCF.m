@@ -1,17 +1,17 @@
 function [V,Vn,J] = JCF(A)
 
- clc
- close all
- clear all
+ % clc
+ % close all
+ % clear all
 
- A_ideal = [-1 2 0 0 1 0;
-     -2 -1 0 0 0 1;
-     0 0 -1 1 0 0;
-     0 0 0 -1 0 0;
-     0 0 0 0 -1 2;
-     0 0 0 0 -2 -1]
- T = randn(length(A_ideal));
- A = T*A_ideal/T;
+ % A_ideal = [-1 2 0 0 1 0;
+ %     -2 -1 0 0 0 1;
+ %     0 0 -1 1 0 0;
+ %     0 0 0 -1 0 0;
+ %     0 0 0 0 -1 2;
+ %     0 0 0 0 -2 -1]
+ % T = randn(length(A_ideal));
+ % A = T*A_ideal/T;
 
 n = length(A);
 [Vm,Jm] = jordan(A);

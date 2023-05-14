@@ -106,11 +106,8 @@ C_e = [1 0 0 0 0];
 D_e1 = [0];
 
 D_e2 = [0 0 1 0 0 -1];
- 
-[V,Vn,J] = JCF(A);
 
-%% REACHABILITY CHECK
-
+%%REACHABILITY CHECK
  R = ctrb(A,B1);
  if rank(R)==length(R)
      disp("FULLY REACHABLE")
@@ -120,24 +117,13 @@ D_e2 = [0 0 1 0 0 -1];
     imRorth = ker(R.');         %ker(R)
     invTR = [imR imRorth];      %T_R^-1
     barA = inv(invTR)*A*invTR;  
-    A22 = barA(rankR+1:end, rankR+1:end);  %non-reachable part of barA
+    A22 = barA(rankR+1:end, rankR+1:end);  %non-reachable part of A
     eA22 = eig(A22);
-    %Stabilizabilty Check
-    for i = 1:length(eA22)  
+    for i = 1:length(eA22)
         if real(eA22(i)) >= 0
             disp('NOT STABILISABLE')
         end
     end
  end
-
-%% OBSERVABILTY CHECK
-
-O = obsv(A,C);
-rankO = rank(O);
-if rankO == length(A)
-    disp('FULLY OBSERVABLE')
-else
-    disp('NOT FULLY OBSERVABLE')
-end
 
 
