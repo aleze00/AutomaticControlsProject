@@ -47,6 +47,8 @@ alfa = 4.515e13; % N/m^5
  beta = 1; %1/sec
  gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
  Ap = 3.35e-4; % m^2
+ Ps = 10342500; %Pa
+ rho = 865; % Kg/m^3
 
 %% Linearization initial conditions
 % in order to compute the equilibrium, we put u=0, d=0, dot{x} = 0 in the
@@ -83,7 +85,7 @@ A = [0 1 0 0 0
     ks/mu betas/mu -kt/mu 0 -Ap/(mu*mi)
     0 -mi*alfa*Ap 0 mi*alfa*Ap -beta];
 
-B1 = [0;0;0;0;mi*gamma];
+B1 = [0;0;0;0;mi*gamma*sqrt(Ps/rho)];
 
 B2 = [0 0 0 0 0 0
     0 1/ms 0 0 0 (ks*(ms+mu))/(ms*mu)
