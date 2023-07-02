@@ -8,12 +8,12 @@ DT = 1e-3;
 Plant = 1;
 
 %% Declaration of the vector dimensions
-n = 5; 
-p  = 1;
-q  = 2;
-m = 3;
-nd = 2;
-r = nd + q + m;
+n = 5; %states
+p  = 1; %input u
+q  = 2; %output y
+m = 1;  %error e 
+nd = 2; %disturbs d
+r = nd + q + m; %exogenous w
 
 
 %% Initial conditions
@@ -77,6 +77,9 @@ e0 = [y0(3)
     y0(2)-y0(1)
     ];
 
+%% LINEARIZATION POINT
+x_tilde_init = x_init - x0;
+
 %% LINEARISED PLANT
 
 A = [0 1 0 0 0
@@ -102,13 +105,14 @@ D1 = [0;0;0];
 D2 = [0 0 1 0 0 0
     0 0 0 1 0 0
     0 1/ms 0 0 1 ks/ms];
+%% MATRICES OF e - e(1) = x(1) + vi(1) - r_l
 
-C_e = [1 0 0 0 0];
+Ce = [1 0 0 0 0];  
 
-D_e1 = [0];
+De1 = [0];
 
-D_e2 = [0 0 1 0 0 -1];
- 
+De2 = [0 0 1 0 0 -1];
+
 %[V,Vn,J] = JCF(A);
 
 %% REACHABILITY CHECK
@@ -142,4 +146,110 @@ else
     disp('NOT FULLY OBSERVABLE')
 end
 
+%% STATE FEEDBACK CONTROL + INTEGRAL ACTION
+Ae = [A zeros(n,m);
+      Ce zeros(m,m)];  % dot(x,eta) = Ae*(x,eta)
 
+Be = [B1
+       zeros(m,p)]; %dot(x,eta) = Be*u
+
+% eps=C_eps*[x,eta]
+% eps=[x1,x2,x3,x4,x5,eta1,Ddot(z_s),z_s-z_r=x1+x3]
+Ceps = [1 0 0 0 0 0
+        0 1 0 0 0 0
+        0 0 1 0 0 0
+        0 0 0 1 0 0
+        0 0 0 0 1 0
+        0 0 0 0 0 1
+        -ks/ms -betas/ms 0 0 Ap/mi 0
+        1 0 1 0 0 0];
+
+% eps=D1eps*u
+D1eps = [0; 0; 0; 0; 0; 0; 0; 0];
+
+% DRIVE MODES
+drive_mode = 0; % 0 = comfort; 1 = off-road; 2 = race
+switch drive_mode 
+    % not to penalize eps, we put it equal to 1e4
+    case 0
+        eps1max = 1e4; % susp. deflection
+        eps2max = 1; % susp. speed
+        eps3max = 1e4; % tire deflection
+        eps4max = 0.1; % tire deflection speed PEN
+        eps5max = 1e6; % actuator force (do not pen)
+        eps6max = 0.1; % integral of the position error PEN 
+        eps7max = 0.01*g; % sprung mass acceleration PEN
+        eps8max = 1; % sprung mass height 
+     
+    case 1
+        eps1max = 1e4; % susp. deflection
+        eps2max = 1e4; % susp. speed
+        eps3max = 0.001; % tire deflection PEN 
+        eps4max = 0.001; % tire speed PEN 
+        eps5max = 1e6; % actuator force (do not pene)
+        eps6max = 0.001; % integral of the position error PEN
+        eps7max = 1e4; % sprung mass acceleration
+        eps8max = 1e4; % sprung mass height 
+
+     case 2
+        eps1max = 0.001; % susp. deflection PEN
+        eps2max = 0.001; % susp. speed PEN
+        eps3max = 1e5; % tire deflection 
+        eps4max = 1e5; % tire speed
+        eps5max = 1e6; % actuator force (do not pene)
+        eps6max = 0.001; % integral of the position error PEN
+        eps7max = 1e4; % sprung mass acceleration
+        eps8max = 0.001; % sprung mass height PEN
+end
+
+Q = inv(8*diag([eps1max^2,eps2max^2,eps3max^2,eps4max^2,eps5max^2, ...
+    eps6max^2,eps7max^2,eps8max^2]));
+
+umax = 1; % DA DEFINIRE
+R = inv(umax^2);
+barR = R+D1eps.'*Q*D1eps;
+
+alpha = 0; %we already have RE(lambda)>0
+
+Am = Ae+alpha*eye(n+m);
+Em = eye(n+m);
+Bm = Be;
+Gm = 0;
+Qm = Ceps.'*Q*Ceps;
+Sm = Ceps.'*Q*D1eps;
+Rm = barR;
+
+[X,Km,L] = icare(Am,Bm,Qm,Rm,Sm,Em,Gm);
+K = -Km;
+KS = K(:,1:n);
+KI = K(:,n+1:n+m);
+
+%% OBSERVER
+lambda_d = 0;
+Ad = A.';
+Bd = C.';
+Cd = B2.';
+Dd = D2.';
+%% DA FINIRE con i dati dei sensori
+% w1max = 100;
+% std_pot = 0.001; % [m] potentiomenter standard deviation
+% std_acc = 0.05*g; % [m/s^2] accelerometer standard deviation
+% 
+% Qd = diag([w1max^2,0,0,0]);
+% Rd = diag([std_pot^2,std_acc^2]);
+% barRd = Rd + Dd.'*Qd*Dd;
+% 
+% Am = Ad+lambda_d*eye(n);
+% Em = eye(n);
+% Bm = Bd;
+% Gm = 0;
+% Qm = Cd.'*Qd*Cd;
+% Sm = Cd.'*Qd*Dd;
+% Rm = barRd;
+% [X,Km,L] = icare(Am,Bm,Qm,Rm,Sm,Em,Gm);
+% KO = Km.';
+% 
+% AO = A-KO*C;
+% BO = B1-KO*D1;
+% CO = eye(n);
+% DO = zeros(n,q);
