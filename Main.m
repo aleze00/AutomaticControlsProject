@@ -109,7 +109,7 @@ D_e1 = [0];
 
 D_e2 = [0 0 1 0 0 -1];
  
-[V,Vn,J] = JCF(A);
+%[V,Vn,J] = JCF(A);
 
 %% REACHABILITY CHECK
 
