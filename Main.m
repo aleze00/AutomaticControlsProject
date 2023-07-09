@@ -10,7 +10,7 @@ Plant = 1;
 %% Declaration of the vector dimensions
 n = 5; %states
 p  = 1; %input u
-q  = 2; %output y
+q  = 3; %output y
 m = 1;  %error e 
 nd = 2; %disturbs d
 r = nd + q + m; %exogenous w
@@ -205,7 +205,7 @@ end
 Q = inv(8*diag([eps1max^2,eps2max^2,eps3max^2,eps4max^2,eps5max^2, ...
     eps6max^2,eps7max^2,eps8max^2]));
 
-umax = 1; % DA DEFINIRE
+umax = 0.01; % source: Road Adaptive....
 R = inv(umax^2);
 barR = R+D1eps.'*Q*D1eps;
 
@@ -230,26 +230,32 @@ Ad = A.';
 Bd = C.';
 Cd = B2.';
 Dd = D2.';
-%% DA FINIRE con i dati dei sensori
-% w1max = 100;
-% std_pot = 0.001; % [m] potentiomenter standard deviation
-% std_acc = 0.05*g; % [m/s^2] accelerometer standard deviation
-% 
-% Qd = diag([w1max^2,0,0,0]);
-% Rd = diag([std_pot^2,std_acc^2]);
-% barRd = Rd + Dd.'*Qd*Dd;
-% 
-% Am = Ad+lambda_d*eye(n);
-% Em = eye(n);
-% Bm = Bd;
-% Gm = 0;
-% Qm = Cd.'*Qd*Cd;
-% Sm = Cd.'*Qd*Dd;
-% Rm = barRd;
-% [X,Km,L] = icare(Am,Bm,Qm,Rm,Sm,Em,Gm);
-% KO = Km.';
-% 
-% AO = A-KO*C;
-% BO = B1-KO*D1;
-% CO = eye(n);
-% DO = zeros(n,q);
+
+% DA FINIRE con i dati dei sensori
+
+w1max = 100; %maximum road acceleration
+w2max = 1000; %maximum lift force (fixed)
+
+
+std_pot = 0.001; % [m] potentiomenter standard deviation
+std_laser = 0.001; %standard deviation laser
+std_acc = 0.05*g; % [m/s^2] accelerometer standard deviation
+
+Qd = diag([w1max^2,w2max^2,0,0,0,0]);
+Rd = diag([std_pot^2,std_laser^2,std_acc^2]);
+barRd = Rd + Dd.'*Qd*Dd;
+
+Am = Ad+lambda_d*eye(n);
+Em = eye(n);
+Bm = Bd;
+Gm = 0;
+Qm = Cd.'*Qd*Cd;
+Sm = Cd.'*Qd*Dd;
+Rm = barRd;
+[X,Km,L] = icare(Am,Bm,Qm,Rm,Sm,Em,Gm);
+KO = Km.';
+
+AO = A-KO*C;
+BO = B1-KO*D1;
+CO = eye(n);
+DO = zeros(n,q);
