@@ -43,7 +43,7 @@ betas = 3000; %damping coefficient
 mi = 1e-7; % scale coefficient to improve numerical conditioning of P
 alfa = 4.515e13; % N/m^5 
 %speed
-v = 4; %[m/s]
+v = 20; %[m/s]
 
 
 %%ACTUATOR PARAMETERS

@@ -63,6 +63,7 @@ y0 = [x0(1)
     -g-ks/ms*(x0(1)-ells)-bs/ms*x0(2)+u0/ms+g];
 e0 = x0(1)-r0;
 
+
 %% LINEARISED PLANT
 
 % state
