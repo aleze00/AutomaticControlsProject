@@ -42,8 +42,11 @@ g = 9.81;
 betas = 3000; %damping coefficient 
 mi = 1e-7; % scale coefficient to improve numerical conditioning of P
 alfa = 4.515e13; % N/m^5 
-%speed
-v = 4; %[m/s]
+A_lift = 3; %m
+Cd_lift = 0.5; 
+rho_lift = 1.225; %kg/m^3
+%speed of the car
+v = 10; %[m/s]
 
 
 %%ACTUATOR PARAMETERS
@@ -238,13 +241,12 @@ Dd = D2.';
 
 % DA FINIRE con i dati dei sensori
 
-w1max = 100; %maximum road acceleration
-w2max = 1000; %maximum lift force (fixed)
-
+w1max = 500; %maximum road acceleration
+w2max = 70; %maximum lift force (fixed)
 
 std_pot = 0.001; % [m] potentiomenter standard deviation
 std_laser = 0.001; %standard deviation laser
-std_acc = 0.05*g; % [m/s^2] accelerometer standard deviation
+std_acc = 110e-6*sqrt(200); % [m/s^2] accelerometer standard deviation
 
 Qd = diag([w1max^2,w2max^2,0,0,0,0]);
 Rd = diag([std_pot^2,std_laser^2,std_acc^2]);
