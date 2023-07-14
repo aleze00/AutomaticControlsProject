@@ -61,7 +61,7 @@ v = 10; %[m/s]
 % non-linearized equation, find x0.
 u0 = 0;
 d0 = [0;0];
-nu0 = [0;0];
+nu0 = [0;0;0];
 r0 = l0s-g*ms/ks;
 w0 = [d0; nu0; r0];
 
