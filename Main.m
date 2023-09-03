@@ -82,7 +82,7 @@ e0 = [y0(3)
     y0(1) - r0      
     y0(2)-y0(1)
     ];
-
+plant0 = []
 %% LINEARIZATION POINT
 x_tilde_init = x_init - x0;
 u_tilde = 0;
