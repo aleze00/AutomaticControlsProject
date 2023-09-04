@@ -4,7 +4,7 @@ close all
 
 %% Simulation setup
 TimeSpan = 10;
-DT = 1e-3;
+DT = 1e-4;
 Plant = 1;
 
 %% Declaration of the vector dimensions
@@ -78,11 +78,9 @@ y0 = [x0(1)
     (1/ms)*(d0(2)-ms*g-ks*(x0(1)-l0s)-betas*x0(2)+u0(1));
     ];
 
-e0 = [y0(3)
-    y0(1) - r0      
-    y0(2)-y0(1)
-    ];
-plant0 = []
+e0 = y0(1) - r0;  
+   
+    
 %% LINEARIZATION POINT
 x_tilde_init = x_init - x0;
 u_tilde = 0;
