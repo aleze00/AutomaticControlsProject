@@ -192,7 +192,7 @@ switch drive_mode
         eps2max = 1e4; % susp. speed
         eps3max = 0.001; % tire deflection PEN 
         eps4max = 0.001; % tire speed PEN 
-        eps5max = 1e6; % actuator force (do not pene)
+        eps5max = 1e6; % actuator force (do not pen)
         eps6max = 0.001; % integral of the position error PEN
         eps7max = 1e4; % sprung mass acceleration
         eps8max = 1e4; % sprung mass height 
@@ -202,7 +202,7 @@ switch drive_mode
         eps2max = 0.001; % susp. speed PEN
         eps3max = 1e5; % tire deflection 
         eps4max = 1e5; % tire speed
-        eps5max = 1e6; % actuator force (do not pene)
+        eps5max = 1e6; % actuator force (do not pen)
         eps6max = 0.001; % integral of the position error PEN
         eps7max = 1e4; % sprung mass acceleration
         eps8max = 0.001; % sprung mass height PEN
