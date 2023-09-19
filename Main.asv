@@ -126,9 +126,10 @@ De2 = [0 0 1 0 0 -1];
  if rank(R)==length(R)
      disp("FULLY REACHABLE")
  else
+    rankR = rank(R);
     disp('NOT FULLY REACHABLE')
     imR = orth(R);              %pg.29 PDF toni
-    imRorth = ker(R.');         %ker(R)
+    imRorth = null(R.');         %ker(R)
     invTR = [imR imRorth];      %T_R^-1
     barA = inv(invTR)*A*invTR;  
     A22 = barA(rankR+1:end, rankR+1:end);  %non-reachable part of barA
@@ -142,7 +143,6 @@ De2 = [0 0 1 0 0 -1];
  end
 
 %% OBSERVABILTY CHECK
-
 O = obsv(A,C);
 rankO = rank(O);
 if rankO == length(A)
@@ -213,12 +213,45 @@ Q = inv(8*diag([eps1max^2,eps2max^2,eps3max^2,eps4max^2,eps5max^2, ...
 umax = 0.01; % source: Road Adaptive....
 R = inv(umax^2);
 barR = R+D1eps.'*Q*D1eps;
-
 alpha = 0; %we already have RE(lambda)>0
-
 Am = Ae+alpha*eye(n+m);
 Em = eye(n+m);
 Bm = Be;
+
+%% REACHABILITY CHECK of Am,Bm
+ lengthAm = length(Am);
+ R = ctrb(Am,Bm);
+ rankR = rank(R);
+ if rank(R)==lengthAm
+     disp("FULLY REACHABLE")
+ else
+    disp('NOT FULLY REACHABLE')
+    imR = orth(R);              %pg.29 PDF toni
+    imRorth = null(R.');         %ker(R)
+    invTR = [imR imRorth];      %T_R^-1
+    barA = inv(invTR)*Am*invTR;  
+    A22 = barA(rankR+1:end, rankR+1:end);  %non-reachable part of barA
+    eA22 = eig(A22);
+    %Stabilizabilty Check
+    for i = 1:length(eA22)  
+        if real(eA22(i)) >= 0
+            disp('NOT STABILISABLE');
+        else disp('Stabilisable');
+        end
+    end
+ end
+
+%% OBSERVABILTY CHECK
+O = obsv(Am,Ceps);
+rankO = rank(O);
+if rankO == length(Am)
+    disp('FULLY OBSERVABLE')
+else
+    disp('NOT FULLY OBSERVABLE')
+    
+end
+
+
 Gm = 0;
 Qm = Ceps.'*Q*Ceps;
 Sm = Ceps.'*Q*D1eps;

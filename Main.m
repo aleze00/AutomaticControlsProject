@@ -65,7 +65,6 @@ nu0 = [0;0;0];
 r0 = l0s-g*ms/ks;
 w0 = [d0; nu0; r0];
 
-
 %obtained from paperwork
 x0 = [l0s-g*ms/ks
     0
@@ -77,7 +76,6 @@ y0 = [x0(1)
     x0(1)+x0(3)
     (1/ms)*(d0(2)-ms*g-ks*(x0(1)-l0s)-betas*x0(2)+u0(1));
     ];
-
 e0 = y0(1) - r0;  
    
     
@@ -87,7 +85,6 @@ u_tilde = 0;
 y_tilde = 0; 
 
 %% LINEARISED PLANT
-
 A = [0 1 0 0 0
     -(ks*(ms+mu))/(ms*mu) -(betas*(ms+mu))/(ms*mu) kt/mu 0 -(Ap/mi*(ms+mu))/(ms*mu)
     0 0 0 1 0
@@ -111,8 +108,8 @@ D1 = [0;0;0];
 D2 = [0 0 1 0 0 0
     0 0 0 1 0 0
     0 1/ms 0 0 1 ks/ms];
-%% MATRICES OF e - e(1) = x(1) + vi(1) - r_l
 
+%% MATRICES OF e - e(1) = x(1) + vi(1) - r_l
 Ce = [1 0 0 0 0];  
 
 De1 = [0];
@@ -126,9 +123,10 @@ De2 = [0 0 1 0 0 -1];
  if rank(R)==length(R)
      disp("FULLY REACHABLE")
  else
+    rankR = rank(R);
     disp('NOT FULLY REACHABLE')
     imR = orth(R);              %pg.29 PDF toni
-    imRorth = ker(R.');         %ker(R)
+    imRorth = null(R.');         %ker(R)
     invTR = [imR imRorth];      %T_R^-1
     barA = inv(invTR)*A*invTR;  
     A22 = barA(rankR+1:end, rankR+1:end);  %non-reachable part of barA
@@ -142,7 +140,6 @@ De2 = [0 0 1 0 0 -1];
  end
 
 %% OBSERVABILTY CHECK
-
 O = obsv(A,C);
 rankO = rank(O);
 if rankO == length(A)
@@ -213,9 +210,7 @@ Q = inv(8*diag([eps1max^2,eps2max^2,eps3max^2,eps4max^2,eps5max^2, ...
 umax = 0.01; % source: Road Adaptive....
 R = inv(umax^2);
 barR = R+D1eps.'*Q*D1eps;
-
 alpha = 0; %we already have RE(lambda)>0
-
 Am = Ae+alpha*eye(n+m);
 Em = eye(n+m);
 Bm = Be;
@@ -224,6 +219,48 @@ Qm = Ceps.'*Q*Ceps;
 Sm = Ceps.'*Q*D1eps;
 Rm = barR;
 
+%% REACHABILITY CHECK of Am,Bm
+ lengthAm = length(Am);
+ R = ctrb(Am,Bm);
+ rankR = rank(R);
+ if rank(R)==lengthAm
+     disp("FULLY REACHABLE")
+ else
+    disp('NOT FULLY REACHABLE')
+    imR = orth(R);              %pg.29 PDF toni
+    imRorth = null(R.');         %ker(R)
+    invTR = [imR imRorth];      %T_R^-1
+    barA = inv(invTR)*Am*invTR;  
+    A22 = barA(rankR+1:end, rankR+1:end);  %non-reachable part of barA
+    eA22 = eig(A22);
+    %Stabilizabilty Check
+    for i = 1:length(eA22)  
+        if real(eA22(i)) >= 0
+            disp('NOT STABILISABLE');
+        else disp('Stabilisable');
+        end
+    end
+ end
+
+%% OBSERVABILTY CHECK of Am, Ceps
+O = obsv(Am,Ceps);
+rankO = rank(O);
+kerO = null(O);
+if rankO == length(Am)
+    disp('FULLY OBSERVABLE')
+else
+    disp('NOT FULLY OBSERVABLE')
+    %DECTABILITY CHECK
+    A11 = barA(1:(length(Ceps)-rankO), 1:(length(Ceps)-rankO));  %non-observable part of barA
+    eA11= eig(A11);
+    %Stabilizabilty Check
+    for i = 1:length(eA11)  
+        if real(eA11(i)) >= 0
+            disp('NOT DETECTABLE');
+        end
+    end
+end
+%% SOLVING RICCATI EQUATION
 [X,Km,L] = icare(Am,Bm,Qm,Rm,Sm,Em,Gm);
 K = -Km;
 KS = K(:,1:n);
