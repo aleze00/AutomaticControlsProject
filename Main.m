@@ -47,9 +47,9 @@ Cd_lift = 0.5;
 rho_lift = 1.225; %kg/m^3
 %speed of the car
 v = 10; %[m/s]
-Lift = 0.5*(v^2)*rho_lift;
+Lift = 0.5*Cd_lift*(v^2)*rho_lift;
 
-%%ACTUATOR PARAMETERS
+%% ACTUATOR PARAMETERS
  beta = 1; %1/sec
  gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
  Ap = 3.35e-4; % m^2
@@ -118,7 +118,7 @@ De2 = [0 0 1 0 0 -1];
 
 %[V,Vn,J] = JCF(A);
 
-%% REACHABILITY CHECK
+%% REACHABILITY CHECK for A,B1
  R = ctrb(A,B1);
  if rank(R)==length(R)
      disp("FULLY REACHABLE")
@@ -139,7 +139,7 @@ De2 = [0 0 1 0 0 -1];
     end
  end
 
-%% OBSERVABILTY CHECK
+%% OBSERVABILTY CHECK for A,C
 O = obsv(A,C);
 rankO = rank(O);
 if rankO == length(A)
@@ -210,7 +210,7 @@ Q = inv(8*diag([eps1max^2,eps2max^2,eps3max^2,eps4max^2,eps5max^2, ...
 umax = 0.01; % source: Road Adaptive....
 R = inv(umax^2);
 barR = R+D1eps.'*Q*D1eps;
-alpha = 0; %we already have RE(lambda)>0
+alpha = 6.6; %we already have RE(lambda)>0. When alpha>6.6 Am,Ceps fully observable
 Am = Ae+alpha*eye(n+m);
 Em = eye(n+m);
 Bm = Be;
@@ -223,6 +223,7 @@ Rm = barR;
  lengthAm = length(Am);
  R = ctrb(Am,Bm);
  rankR = rank(R);
+ disp('---REACHABILITY CHECK of Am,Bm---');
  if rank(R)==lengthAm
      disp("FULLY REACHABLE")
  else
@@ -236,8 +237,9 @@ Rm = barR;
     %Stabilizabilty Check
     for i = 1:length(eA22)  
         if real(eA22(i)) >= 0
-            disp('NOT STABILISABLE');
-        else disp('Stabilisable');
+            disp('NOT STABILISABLE thanks to eigenvalue number: ');
+            disp(i);
+        else disp('STABILISABLE');
         end
     end
  end
@@ -246,6 +248,7 @@ Rm = barR;
 O = obsv(Am,Ceps);
 rankO = rank(O);
 kerO = null(O);
+disp('---OBSERVABILTY CHECK of Am, Ceps---');
 if rankO == length(Am)
     disp('FULLY OBSERVABLE')
 else
@@ -256,7 +259,8 @@ else
     %Stabilizabilty Check
     for i = 1:length(eA11)  
         if real(eA11(i)) >= 0
-            disp('NOT DETECTABLE');
+            disp('NOT DETECTABLE thanks to eigenvalue number: ');
+            disp(i);
         end
     end
 end
