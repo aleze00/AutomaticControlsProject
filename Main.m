@@ -54,6 +54,7 @@ Lift = 0.5*Cd_lift*(v^2)*rho_lift;
  gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
  Ap = 3.35e-4; % m^2
  Ps = 10342500; %Pa
+ Ps = Ps/1e5; %atm
  rho = 865; % Kg/m^3
 
 %% Linearization initial conditions
@@ -210,7 +211,7 @@ Q = inv(8*diag([eps1max^2,eps2max^2,eps3max^2,eps4max^2,eps5max^2, ...
 umax = 0.01; % source: Road Adaptive....
 R = inv(umax^2);
 barR = R+D1eps.'*Q*D1eps;
-alpha = 6.6; %we already have RE(lambda)>0. When alpha>6.6 Am,Ceps fully observable
+alpha = 6.6; %we already have RE(lambda)>0. When alpha>6.6 Am,Ceps fully observable, otherwise is stabilisable
 Am = Ae+alpha*eye(n+m);
 Em = eye(n+m);
 Bm = Be;
@@ -237,7 +238,7 @@ Rm = barR;
     %Stabilizabilty Check
     for i = 1:length(eA22)  
         if real(eA22(i)) >= 0
-            disp('NOT STABILISABLE thanks to eigenvalue number: ');
+            disp('-NOT STABILISABLE thanks to eigenvalue number: ');
             disp(i);
         else disp('STABILISABLE');
         end
@@ -259,7 +260,7 @@ else
     %Stabilizabilty Check
     for i = 1:length(eA11)  
         if real(eA11(i)) >= 0
-            disp('NOT DETECTABLE thanks to eigenvalue number: ');
+            disp('-NOT DETECTABLE thanks to eigenvalue number: ');
             disp(i);
         end
     end
