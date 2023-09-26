@@ -34,14 +34,12 @@ x_init = [zs_init-zu_init
 %% Plant Parameters
 ks = 29300; %spring coefficient
 kt = 290000; %tyre elastic coefficient
-mu = 38;
-ms = 395;
+mu = 38*1e3; %gr
+ms = 395*1e3; %gr
 l0s = 0.5;
 l0t = 0.10;
 g = 9.81;
 betas = 3000; %damping coefficient 
-mi = 1e-7; % scale coefficient to improve numerical conditioning of P
-alfa = 4.515e13; % N/m^5 
 A_lift = 3; %m
 Cd_lift = 0.5; 
 rho_lift = 1.225; %kg/m^3
@@ -50,12 +48,23 @@ v = 10; %[m/s]
 Lift = 0.5*Cd_lift*(v^2)*rho_lift;
 
 %% ACTUATOR PARAMETERS
- beta = 1; %1/sec
- gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
- Ap = 3.35e-4; % m^2
- Ps = 10342500; %Pa
- Ps = Ps/1e5; %atm
- rho = 865; % Kg/m^3
+mi = 1e-7; % scale coefficient to improve numerical conditioning of P
+alfa = 4.515e13; % N/m^5  
+beta = 1; %1/sec
+gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
+Ap = 3.35e-4; % m^2
+Ps = 10342500/(10^5); %Pa
+Ps = Ps/1e5; %atm
+rho = 865; % Kg/m^3
+
+% Act. Par. Test
+mi = 1; % scale coefficient to improve numerical conditioning of P
+alfa = 1; % N/m^5  
+beta = 1; %1/sec
+gamma = 1; % N/m^(5/2)kg^(1/2)
+Ap = 1; % m^2
+Ps = (1e5)/(1e5); %Pa
+rho = 1; % Kg/m^3
 
 %% Linearization initial conditions
 % in order to compute the equilibrium, we put u=0, d=0, dot{x} = 0 in the
@@ -90,7 +99,7 @@ A = [0 1 0 0 0
     -(ks*(ms+mu))/(ms*mu) -(betas*(ms+mu))/(ms*mu) kt/mu 0 -(Ap/mi*(ms+mu))/(ms*mu)
     0 0 0 1 0
     ks/mu betas/mu -kt/mu 0 -Ap/(mu*mi)
-    0 -mi*alfa*Ap 0 mi*alfa*Ap -beta];
+    0 -mi*alfa*Ap 0 0 -beta]
 
 B1 = [0;0;0;0;mi*gamma*sqrt(Ps/rho)];
 
@@ -211,7 +220,7 @@ Q = inv(8*diag([eps1max^2,eps2max^2,eps3max^2,eps4max^2,eps5max^2, ...
 umax = 0.01; % source: Road Adaptive....
 R = inv(umax^2);
 barR = R+D1eps.'*Q*D1eps;
-alpha = 6.6; %we already have RE(lambda)>0. When alpha>6.6 Am,Ceps fully observable, otherwise is stabilisable
+alpha = 0; %we already have RE(lambda)>0. When alpha>6.6 Am,Ceps fully observable, otherwise is stabilisable
 Am = Ae+alpha*eye(n+m);
 Em = eye(n+m);
 Bm = Be;
