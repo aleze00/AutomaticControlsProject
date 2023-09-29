@@ -7,6 +7,7 @@ TimeSpan = 10;
 DT = 1e-4;
 Plant = 1;
 
+
 %% Declaration of the vector dimensions
 n = 5; %states
 p  = 1; %input u
@@ -32,17 +33,16 @@ x_init = [zs_init-zu_init
     Pl_init];
 
 %% Plant Parameters
-ks = 29300; %spring coefficient
-kt = 290000; %tyre elastic coefficient
-mu = 38;
-ms = 395;
-l0s = 0.5;
-l0t = 0.10;
+ks = 10000; %spring coefficient
+kt = 100000; %tyre elastic coefficient
+mu = 100;
+ms = 400;
+l0s = 0.5; % [m] lenght of the sprung for which the force is 0
+l0t = 0.1; % [m]
 g = 9.81;
-betas = 3000; %damping coefficient 
-mi = 1e-7; % scale coefficient to improve numerical conditioning of P
-alfa = 4.515e13; % N/m^5 
-A_lift = 3; %m
+betas = 500; %damping coefficient 
+alfa = 4.52e9; % mN/m^5 reduced by 10^4 because of the non conditioning of A
+A_lift = 3;
 Cd_lift = 0.5; 
 rho_lift = 1.225; %kg/m^3
 %speed of the car
@@ -51,10 +51,11 @@ Lift = 0.5*Cd_lift*(v^2)*rho_lift;
 
 %% ACTUATOR PARAMETERS
  beta = 1; %1/sec
+ mi = 1e-6; % scale coefficient to improve numerical conditioning of P
  gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
  Ap = 3.35e-4; % m^2
  Ps = 10342500; %Pa
- Ps = Ps/1e5; %atm
+ Ps = Ps/101300; %atm
  rho = 865; % Kg/m^3
 
 %% Linearization initial conditions
@@ -63,7 +64,7 @@ Lift = 0.5*Cd_lift*(v^2)*rho_lift;
 u0 = 0;
 d0 = [0;Lift]; %???
 nu0 = [0;0;0];
-r0 = l0s-g*ms/ks;
+r0 = l0s-g*ms/ks; % lenght of the sprung when the car load is stationary
 w0 = [d0; nu0; r0];
 
 %obtained from paperwork
@@ -73,9 +74,9 @@ x0 = [l0s-g*ms/ks
     0
     0];
 %from the model equations
-y0 = [x0(1)
-    x0(1)+x0(3)
-    (1/ms)*(d0(2)-ms*g-ks*(x0(1)-l0s)-betas*x0(2)+u0(1));
+y0 = [x0(1) % suspension lenght (potentiomete)
+    x0(1)+x0(3) % car height (laser)
+    (1/ms)*(d0(2)-ms*g-ks*(x0(1)-l0s)-betas*x0(2)+u0(1)); % passenger acceleration
     ];
 e0 = y0(1) - r0;  
    
@@ -90,7 +91,7 @@ A = [0 1 0 0 0
     -(ks*(ms+mu))/(ms*mu) -(betas*(ms+mu))/(ms*mu) kt/mu 0 -(Ap/mi*(ms+mu))/(ms*mu)
     0 0 0 1 0
     ks/mu betas/mu -kt/mu 0 -Ap/(mu*mi)
-    0 -mi*alfa*Ap 0 mi*alfa*Ap -beta];
+    0 -mi*alfa*Ap 0 0 -beta];
 
 B1 = [0;0;0;0;mi*gamma*sqrt(Ps/rho)];
 
@@ -211,7 +212,7 @@ Q = inv(8*diag([eps1max^2,eps2max^2,eps3max^2,eps4max^2,eps5max^2, ...
 umax = 0.01; % source: Road Adaptive....
 R = inv(umax^2);
 barR = R+D1eps.'*Q*D1eps;
-alpha = 6.6; %we already have RE(lambda)>0. When alpha>6.6 Am,Ceps fully observable, otherwise is stabilisable
+alpha = 0; %we already have RE(lambda)>0. When alpha>6.6 Am,Ceps fully observable, otherwise is stabilisable
 Am = Ae+alpha*eye(n+m);
 Em = eye(n+m);
 Bm = Be;
