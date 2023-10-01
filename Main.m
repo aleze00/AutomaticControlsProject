@@ -18,8 +18,8 @@ r = nd + q + m; %exogenous w
 
 
 %% Initial conditions
-zu_init = 0.10;
-zs_init = 0.5+zu_init;
+zu_init = 0.31;
+zs_init = 0.406 + zu_init;
 vs_init = 0;
 vu_init = 0;
 zr_init = 0;
@@ -36,11 +36,11 @@ x_init = [zs_init-zu_init
 ks = 10000; %spring coefficient
 kt = 100000; %tyre elastic coefficient
 mu = 100;
-ms = 400;
-l0s = 0.5; % [m] lenght of the sprung for which the force is 0
-l0t = 0.1; % [m]
+ms = 300;
+l0s = 0.7; % [m] lenght of the sprung for which the force is 0
+l0t = 0.35; % [m]
 g = 9.81;
-betas = 500; %damping coefficient 
+betas = 500; % damping coefficient 
 alfa = 4.52e9; % mN/m^5 reduced by 10^4 because of the non conditioning of A
 A_lift = 3;
 Cd_lift = 0.5; 
@@ -74,7 +74,7 @@ x0 = [l0s-g*ms/ks
     0
     0];
 %from the model equations
-y0 = [x0(1) % suspension lenght (potentiomete)
+y0 = [x0(1) % suspension lenght (potentiometer)
     x0(1)+x0(3) % car height (laser)
     (1/ms)*(d0(2)-ms*g-ks*(x0(1)-l0s)-betas*x0(2)+u0(1)); % passenger acceleration
     ];
