@@ -26,15 +26,10 @@ vu_init = 0;
 zr_init = 0;
 dotzr_init = 0;
 
-x_init = [zs_init-zu_init
-    vs_init-vu_init
-    zu_init-zr_init
-    vu_init-dotzr_init];
-
-% x_init = [0.3467
-%     0
-%     0.0819
-%     0];
+x_init = [zs_init-zu_init       % SusLen
+    vs_init-vu_init             % relative velocity sprung-unsprung
+    zu_init-zr_init             % Tire height
+    vu_init-dotzr_init];        % relative velocity unsprung-road
 
 %% NOMINAL PLANT PARAMETERS USED TO DESIGN THE CONTROL SYSTEM
 
@@ -47,6 +42,11 @@ ellt = 0.10;
 g = 9.81;
 bs = 3000;
 
+A_lift = 3;
+Cd_lift = 0.5; 
+rho_lift = 1.225; %kg/m^3
+v = 10; %[m/s] speed of the car
+Lift = 0.5*Cd_lift*(v^2)*rho_lift;
 
 %% LINEARISATION CONDITIONS
 
@@ -59,10 +59,9 @@ x0 = [ells-g*ms/ks
     0
     ellt-g*(ms+mu)/kt
     0];
-y0 = [x0(1)
-    -g-ks/ms*(x0(1)-ells)-bs/ms*x0(2)+u0/ms+g];
+y0 = [x0(1)                                                 % SusLen (potentiometer)
+    -g-ks/ms*(x0(1)-ells)-bs/ms*x0(2)+u0/ms+g];             % Sprung massa acceleration (accelerometer)
 e0 = x0(1)-r0;
-
 
 %% LINEARISED PLANT
 

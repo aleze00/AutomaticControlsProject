@@ -7,7 +7,6 @@ TimeSpan = 10;
 DT = 1e-4;
 Plant = 1;
 
-
 %% Declaration of the vector dimensions
 n = 5; %states
 p  = 1; %input u
@@ -16,89 +15,94 @@ m = 1;  %error e
 nd = 2; %disturbs d
 r = nd + q + m; %exogenous w
 
+% x = sym('x', [5 1], 'real');
+% w = sym('w', [6 1], 'real');
+% syms u real
 
-%% Initial conditions
-zu_init = 0.31;
-zs_init = 0.406 + zu_init;
-vs_init = 0;
-vu_init = 0;
-zr_init = 0;
-dotzr_init = 0;
-Pl_init = 0;
-
-x_init = [zs_init-zu_init
-    vs_init-vu_init
-    zu_init-zr_init
-    vu_init-dotzr_init
-    Pl_init];
+% syms ks kt mu ms l0s l0t g betas Lift real
+% syms beta mi gamma Ap Ps alfa rho real
 
 %% Plant Parameters
-ks = 10000; %spring coefficient
-kt = 100000; %tyre elastic coefficient
+ks = 50000; % [N/m] spring coefficient
+kt = 500000; % [N/m] tyre elastic coefficient
 mu = 100;
 ms = 300;
 l0s = 0.7; % [m] lenght of the sprung for which the force is 0
 l0t = 0.35; % [m]
 g = 9.81;
 betas = 500; % damping coefficient 
-alfa = 4.52e9; % mN/m^5 reduced by 10^4 because of the non conditioning of A
+
 A_lift = 3;
 Cd_lift = 0.5; 
-rho_lift = 1.225; %kg/m^3
-%speed of the car
-v = 10; %[m/s]
-Lift = 0.5*Cd_lift*(v^2)*rho_lift;
+rho_lift = 1.225; % kg/m^3
+v = 10; % [m/s] speed of the car
+Lift = 0.5*A_lift*Cd_lift*(v^2)*rho_lift;
 
 %% ACTUATOR PARAMETERS
- beta = 1; %1/sec
- mi = 1e-6; % scale coefficient to improve numerical conditioning of P
- gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
- Ap = 3.35e-4; % m^2
- Ps = 10342500; %Pa
- Ps = Ps/101300; %atm
- rho = 865; % Kg/m^3
+beta = 1; %1/sec
+mi = 1e-7; % scale coefficient to improve numerical conditioning of P
+gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
+Ap = 3.35e-4; % m^2
+Ps = 10342500; % Pa
+alfa = 4.515e9; % N/m^5
+rho = 865; % Kg/m^3 hydraulic fluid density found on internet
+
+% %% State Space Model
+% 
+% dotxstar1 = x(2);
+% dotxstar2 = ((mu+ms)/(ms*mu))*(-ks*(x(1)-l0s)-betas*x(2))-1/mu*(-kt*(x(3)-l0t))+ w(2)/ms + ((mu+ms)/(ms*mu))*(Ap/mi)*x(5);
+% dotxstar3 = x(4);
+% dotxstar4 = -g + ks/mu*(x(1)-l0s) + betas/mu*x(2) + 1/mu*(-kt*(x(3)-l0t)) - w(1) - 1/mu*(Ap/mi)*x(5);
+% dotxstar5 = -beta*x(5) - mi*alfa*Ap*x(2) + mi*gamma*u;
+% 
+% dot_xstar = [dotxstar1;dotxstar2;dotxstar3;dotxstar4;dotxstar5];
+% 
+% %% Matrixes Calculation using Numbers
+% 
+% Astar = jacobian(dot_xstar, x);
+% B1star = jacobian(dot_xstar, u);
+% B2star = jacobian(dot_xstar, w);
 
 %% Linearization initial conditions
 % in order to compute the equilibrium, we put u=0, d=0, dot{x} = 0 in the
 % non-linearized equation, find x0.
 u0 = 0;
-d0 = [0;Lift]; %???
+d0 = [0;Lift];
 nu0 = [0;0;0];
-r0 = l0s-g*ms/ks; % lenght of the sprung when the car load is stationary
+r0 = - g*ms/ks + l0s + Lift/ks; % lenght of the sprung when the car load is stationary (same as the equilibrium point x0(1)
 w0 = [d0; nu0; r0];
 
 %obtained from paperwork
-x0 = [l0s-g*ms/ks
+x0 = [- g*ms/ks + l0s + Lift/ks
     0
-    l0t-g*(ms+mu)/kt
+    Lift/kt + l0t - g*(mu+ms)/kt
     0
     0];
 %from the model equations
-y0 = [x0(1) % suspension lenght (potentiometer)
-    x0(1)+x0(3) % car height (laser)
-    (1/ms)*(d0(2)-ms*g-ks*(x0(1)-l0s)-betas*x0(2)+u0(1)); % passenger acceleration
-    ];
-e0 = y0(1) - r0;  
-   
+y0 = [x0(1)                                         % suspension lenght (potentiometer)
+    x0(1)+x0(3)                                     % car height (laser)
+    (1/ms)*(Lift-ms*g-ks*(x0(1)-l0s))];      % passenger acceleration
     
-%% LINEARIZATION POINT
-x_tilde_init = x_init - x0;
-u_tilde = 0;
-y_tilde = 0; 
+e0 = y0(1) - r0;
 
 %% LINEARISED PLANT
+
+N = (ms+mu)/(ms*mu);
+
+% no vector (except [0]) will result in [0] if multiplied by A
+
 A = [0 1 0 0 0
-    -(ks*(ms+mu))/(ms*mu) -(betas*(ms+mu))/(ms*mu) kt/mu 0 -(Ap/mi*(ms+mu))/(ms*mu)
+    -ks*N -betas*N kt/mu 0 Ap/mi*N
     0 0 0 1 0
     ks/mu betas/mu -kt/mu 0 -Ap/(mu*mi)
     0 -mi*alfa*Ap 0 0 -beta];
 
-B1 = [0;0;0;0;mi*gamma*sqrt(Ps/rho)];
+B1 = [0;0;0;0;mi*gamma];
 
 B2 = [0 0 0 0 0 0
-    0 1/ms 0 0 0 (ks*(ms+mu))/(ms*mu)
+    0 1/ms 0 0 0 0
     0 0 0 0 0 0
-    -1 0 0 0 0 -ks/mu
+    -1 0 0 0 0 0
     0 0 0 0 0 0];
 
 C = [1 0 0 0 0
@@ -109,7 +113,17 @@ D1 = [0;0;0];
 
 D2 = [0 0 1 0 0 0
     0 0 0 1 0 0
-    0 1/ms 0 0 1 ks/ms];
+    0 1/ms 0 0 1 0];
+
+%% Initial Conditions: different from the equilibrium but not too much
+
+x_init = [(- g*ms/ks + l0s + Lift/ks) - (0.1*(2*rand(1,1)-1))
+    0
+    (Lift/kt + l0t - g*(mu+ms)/kt) - (0.1*(2*rand(1,1)-1))
+    0
+    0];
+
+x_tilde_init = x_init - x0;
 
 %% MATRICES OF e - e(1) = x(1) + vi(1) - r_l
 Ce = [1 0 0 0 0];  
@@ -266,6 +280,7 @@ else
         end
     end
 end
+
 %% SOLVING RICCATI EQUATION
 [X,Km,L] = icare(Am,Bm,Qm,Rm,Sm,Em,Gm);
 K = -Km;
