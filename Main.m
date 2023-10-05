@@ -23,14 +23,14 @@ r = nd + q + m; %exogenous w
 % syms beta mi gamma Ap Ps alfa rho real
 
 %% Plant Parameters
-ks = 50000; % [N/m] spring coefficient
-kt = 500000; % [N/m] tyre elastic coefficient
-mu = 100;
-ms = 300;
+ks = 29000; % [N/m] spring coefficient
+kt = 293000; % [N/m] tyre elastic coefficient
+mu = 38;
+ms = 295;
 l0s = 0.7; % [m] lenght of the sprung for which the force is 0
 l0t = 0.35; % [m]
 g = 9.81;
-betas = 500; % damping coefficient 
+betas = 3000; % damping coefficient 
 
 A_lift = 3;
 Cd_lift = 0.5; 
@@ -81,7 +81,7 @@ x0 = [- g*ms/ks + l0s + Lift/ks
 %from the model equations
 y0 = [x0(1)                                         % suspension lenght (potentiometer)
     x0(1)+x0(3)                                     % car height (laser)
-    (1/ms)*(Lift-ms*g-ks*(x0(1)-l0s))];      % passenger acceleration
+    (1/ms)*(Lift-ms*g-ks*(x0(1)-l0s))];             % passenger acceleration
     
 e0 = y0(1) - r0;
 
@@ -293,8 +293,6 @@ Ad = A.';
 Bd = C.';
 Cd = B2.';
 Dd = D2.';
-
-% DA FINIRE con i dati dei sensori
 
 w1max = 500; %maximum road acceleration
 w2max = 70; %maximum lift force (fixed)
