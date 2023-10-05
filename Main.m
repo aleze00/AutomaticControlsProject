@@ -2,6 +2,11 @@ clc
 clear 
 close all
 
+% più faccio crescere u e più mi allontano dall'equilibrio
+% per questo con il gain succede un casino
+% forse potremmo alzare gamma?
+% quello non lineare dovrebbe migliorare con il gain
+
 %% Simulation setup
 TimeSpan = 10;
 DT = 1e-4;
@@ -43,9 +48,12 @@ beta = 1; %1/sec
 mi = 1e-7; % scale coefficient to improve numerical conditioning of P
 gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
 Ap = 3.35e-4; % m^2
-Ps = 10342500; % Pa
 alfa = 4.515e9; % N/m^5
-rho = 865; % Kg/m^3 hydraulic fluid density found on internet
+
+% Ps = 10342500; % Pa
+% rho = 865; % Kg/m^3 hydraulic fluid density found on internet
+% P = pressure drop across pistons
+% x5 = mi*P
 
 % %% State Space Model
 % 
@@ -64,12 +72,12 @@ rho = 865; % Kg/m^3 hydraulic fluid density found on internet
 % B2star = jacobian(dot_xstar, w);
 
 %% Linearization initial conditions
-% in order to compute the equilibrium, we put u=0, d=0, dot{x} = 0 in the
+% in order to compute the equilibrium, we put u=0, dot{x} = 0 in the
 % non-linearized equation, find x0.
 u0 = 0;
 d0 = [0;Lift];
 nu0 = [0;0;0];
-r0 = - g*ms/ks + l0s + Lift/ks; % lenght of the sprung when the car load is stationary (same as the equilibrium point x0(1)
+r0 = - g*ms/ks + l0s + Lift/ks; % lenght of the sprung when the car load is stationary (same as the equilibrium point x0(1))
 w0 = [d0; nu0; r0];
 
 %obtained from paperwork
@@ -78,6 +86,7 @@ x0 = [- g*ms/ks + l0s + Lift/ks
     Lift/kt + l0t - g*(mu+ms)/kt
     0
     0];
+
 %from the model equations
 y0 = [x0(1)                                         % suspension lenght (potentiometer)
     x0(1)+x0(3)                                     % car height (laser)
@@ -88,8 +97,6 @@ e0 = y0(1) - r0;
 %% LINEARISED PLANT
 
 N = (ms+mu)/(ms*mu);
-
-% no vector (except [0]) will result in [0] if multiplied by A
 
 A = [0 1 0 0 0
     -ks*N -betas*N kt/mu 0 Ap/mi*N
@@ -117,11 +124,13 @@ D2 = [0 0 1 0 0 0
 
 %% Initial Conditions: different from the equilibrium but not too much
 
-x_init = [(- g*ms/ks + l0s + Lift/ks) - (0.1*(2*rand(1,1)-1))
-    0
-    (Lift/kt + l0t - g*(mu+ms)/kt) - (0.1*(2*rand(1,1)-1))
-    0
-    0];
+Diseq = (0.1*(2*rand(1,1)-1));
+
+x_init = [(- g*ms/ks + l0s + Lift/ks) - Diseq
+    Diseq
+    (Lift/kt + l0t - g*(mu+ms)/kt) - Diseq
+    Diseq
+    Diseq];
 
 x_tilde_init = x_init - x0;
 
@@ -319,3 +328,4 @@ AO = A-KO*C;
 BO = B1-KO*D1;
 CO = eye(n);
 DO = zeros(n,q);
+XOinit = x_tilde_init;
