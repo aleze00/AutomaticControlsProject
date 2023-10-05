@@ -124,7 +124,7 @@ D2 = [0 0 1 0 0 0
 
 %% Initial Conditions: different from the equilibrium but not too much
 
-Diseq = (0.1*(2*rand(1,1)-1));
+Diseq = 0; %(0.1*(2*rand(1,1)-1));
 
 x_init = [(- g*ms/ks + l0s + Lift/ks) - Diseq
     Diseq
