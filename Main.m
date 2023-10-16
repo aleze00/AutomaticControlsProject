@@ -2,11 +2,6 @@ clc
 clear 
 close all
 
-% più faccio crescere u e più mi allontano dall'equilibrio
-% per questo con il gain succede un casino
-% forse potremmo alzare gamma?
-% quello non lineare dovrebbe migliorare con il gain
-
 %% Simulation setup
 TimeSpan = 10;
 DT = 1e-4;
@@ -19,13 +14,6 @@ q  = 3; %output y
 m = 1;  %error e 
 nd = 2; %disturbs d
 r = nd + q + m; %exogenous w
-
-% x = sym('x', [5 1], 'real');
-% w = sym('w', [6 1], 'real');
-% syms u real
-
-% syms ks kt mu ms l0s l0t g betas Lift real
-% syms beta mi gamma Ap Ps alfa rho real
 
 %% Plant Parameters
 ks = 29000; % [N/m] spring coefficient
@@ -55,29 +43,12 @@ alfa = 4.515e9; % N/m^5
 % P = pressure drop across pistons
 % x5 = mi*P
 
-% %% State Space Model
-% 
-% dotxstar1 = x(2);
-% dotxstar2 = ((mu+ms)/(ms*mu))*(-ks*(x(1)-l0s)-betas*x(2))-1/mu*(-kt*(x(3)-l0t))+ w(2)/ms + ((mu+ms)/(ms*mu))*(Ap/mi)*x(5);
-% dotxstar3 = x(4);
-% dotxstar4 = -g + ks/mu*(x(1)-l0s) + betas/mu*x(2) + 1/mu*(-kt*(x(3)-l0t)) - w(1) - 1/mu*(Ap/mi)*x(5);
-% dotxstar5 = -beta*x(5) - mi*alfa*Ap*x(2) + mi*gamma*u;
-% 
-% dot_xstar = [dotxstar1;dotxstar2;dotxstar3;dotxstar4;dotxstar5];
-% 
-% %% Matrixes Calculation using Numbers
-% 
-% Astar = jacobian(dot_xstar, x);
-% B1star = jacobian(dot_xstar, u);
-% B2star = jacobian(dot_xstar, w);
-
 %% Linearization initial conditions
-% in order to compute the equilibrium, we put u=0, dot{x} = 0 in the
-% non-linearized equation, find x0.
+% in order to compute the equilibrium, we put u=0, dot{x} = 0
 u0 = 0;
 d0 = [0;Lift];
 nu0 = [0;0;0];
-r0 = - g*ms/ks + l0s + Lift/ks; % lenght of the sprung when the car load is stationary (same as the equilibrium point x0(1))
+r0 = - g*ms/ks + l0s + Lift/ks; % same as the equilibrium point x0(1)
 w0 = [d0; nu0; r0];
 
 %obtained from paperwork
@@ -232,10 +203,10 @@ end
 Q = inv(8*diag([eps1max^2,eps2max^2,eps3max^2,eps4max^2,eps5max^2, ...
     eps6max^2,eps7max^2,eps8max^2]));
 
-umax = 0.01; % source: Road Adaptive....
+umax = 0.01; % source: Road Adaptive DA CONTROLLARE
 R = inv(umax^2);
 barR = R+D1eps.'*Q*D1eps;
-alpha = 0; %we already have RE(lambda)>0. When alpha>6.6 Am,Ceps fully observable, otherwise is stabilisable
+alpha = 0;
 Am = Ae+alpha*eye(n+m);
 Em = eye(n+m);
 Bm = Be;
@@ -253,7 +224,7 @@ Rm = barR;
      disp("FULLY REACHABLE")
  else
     disp('NOT FULLY REACHABLE')
-    imR = orth(R);              %pg.29 PDF toni
+    imR = orth(R);              
     imRorth = null(R.');         %ker(R)
     invTR = [imR imRorth];      %T_R^-1
     barA = inv(invTR)*Am*invTR;  

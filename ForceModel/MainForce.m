@@ -16,6 +16,12 @@ m = 1;                                      % error e
 nd = 2;                                     % disturbs d
 r = nd + q + m;                             % exogenous w
 
+% x = sym('x', [5 1], 'real');
+% w = sym('w', [6 1], 'real');
+% syms u real
+
+% syms ks kt mu ms l0s l0t g betas Lift real
+% syms beta mi gamma Ap Ps alfa rho real
 
 %% Initial conditions
 zu_init = 0.342;
@@ -30,6 +36,22 @@ x_init = [zs_init-zu_init
     vs_init-vu_init
     zu_init-zr_init
     vu_init-dotzr_init];
+
+% %% State Space Model
+% 
+% dotxstar1 = x(2);
+% dotxstar2 = ((mu+ms)/(ms*mu))*(-ks*(x(1)-l0s)-betas*x(2))-1/mu*(-kt*(x(3)-l0t))+ w(2)/ms + ((mu+ms)/(ms*mu))*(Ap/mi)*x(5);
+% dotxstar3 = x(4);
+% dotxstar4 = -g + ks/mu*(x(1)-l0s) + betas/mu*x(2) + 1/mu*(-kt*(x(3)-l0t)) - w(1) - 1/mu*(Ap/mi)*x(5);
+% dotxstar5 = -beta*x(5) - mi*alfa*Ap*x(2) + mi*gamma*u;
+% 
+% dot_xstar = [dotxstar1;dotxstar2;dotxstar3;dotxstar4;dotxstar5];
+% 
+% %% Matrixes Calculation using Numbers
+% 
+% Astar = jacobian(dot_xstar, x);
+% B1star = jacobian(dot_xstar, u);
+% B2star = jacobian(dot_xstar, w);
 
 %% Plant Parameters
 ks = 50000; % spring coefficient
