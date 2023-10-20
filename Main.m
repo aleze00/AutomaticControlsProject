@@ -36,7 +36,7 @@ beta = 1; %1/sec
 mi = 1e-7; % scale coefficient to improve numerical conditioning of P
 gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
 Ap = 3.35e-4; % m^2
-alfa = 4.515e9; % N/m^5
+alfa = 4.515e13; % N/m^5
 
 % Ps = 10342500; % Pa
 % rho = 865; % Kg/m^3 hydraulic fluid density found on internet
@@ -93,9 +93,10 @@ D2 = [0 0 1 0 0 0
     0 0 0 1 0 0
     0 1/ms 0 0 1 0];
 
-%% Initial Conditions: different from the equilibrium but not too much
+%% Initial Conditions (randomly different from the equilibrium)
 
-Diseq = 0; %(0.1*(2*rand(1,1)-1));
+Diseq = 0; % parameter that randomly set the difference from eq position     
+%Diseq = (0.1*(2*rand(1,1)-1));
 
 x_init = [(- g*ms/ks + l0s + Lift/ks) - Diseq
     Diseq
@@ -103,37 +104,36 @@ x_init = [(- g*ms/ks + l0s + Lift/ks) - Diseq
     Diseq
     Diseq];
 
-x_tilde_init = x_init - x0;
+x_tilde_init = x_init - x0; % difference from eq position
 
 %% MATRICES OF e - e(1) = x(1) + vi(1) - r_l
 Ce = [1 0 0 0 0];  
 
-De1 = [0];
+De1 = 0;
 
 De2 = [0 0 1 0 0 -1];
 
-%[V,Vn,J] = JCF(A);
-
 %% REACHABILITY CHECK for A,B1
- R = ctrb(A,B1);
- if rank(R)==length(R)
-     disp("FULLY REACHABLE")
- else
+R = ctrb(A,B1);
+if rank(R)==length(R)
+    disp("FULLY REACHABLE")
+else
     rankR = rank(R);
     disp('NOT FULLY REACHABLE')
-    imR = orth(R);              %pg.29 PDF toni
+    imR = orth(R);              
     imRorth = null(R.');         %ker(R)
     invTR = [imR imRorth];      %T_R^-1
-    barA = inv(invTR)*A*invTR;  
+    barA = inv(invTR)*A*invTR;
     A22 = barA(rankR+1:end, rankR+1:end);  %non-reachable part of barA
     eA22 = eig(A22);
+
     %Stabilizabilty Check
-    for i = 1:length(eA22)  
+    for i = 1:length(eA22)
         if real(eA22(i)) >= 0
             disp('NOT STABILISABLE')
         end
     end
- end
+end
 
 %% OBSERVABILTY CHECK for A,C
 O = obsv(A,C);
@@ -146,13 +146,14 @@ end
 
 %% STATE FEEDBACK CONTROL + INTEGRAL ACTION
 Ae = [A zeros(n,m);
-      Ce zeros(m,m)];  % dot(x,eta) = Ae*(x,eta)
+      Ce zeros(m,m)];   % dot(x,eta) = Ae*(x,eta)
 
 Be = [B1
-       zeros(m,p)]; %dot(x,eta) = Be*u
+       zeros(m,p)];     % dot(x,eta) = Be*u
 
 % eps=C_eps*[x,eta]
 % eps=[x1,x2,x3,x4,x5,eta1,Ddot(z_s),z_s-z_r=x1+x3]
+
 Ceps = [1 0 0 0 0 0
         0 1 0 0 0 0
         0 0 1 0 0 0
@@ -162,7 +163,7 @@ Ceps = [1 0 0 0 0 0
         -ks/ms -betas/ms 0 0 Ap/mi 0
         1 0 1 0 0 0];
 
-% eps=D1eps*u
+% eps = D1eps*u
 D1eps = [0; 0; 0; 0; 0; 0; 0; 0];
 
 % DRIVE MODES
@@ -216,29 +217,29 @@ Sm = Ceps.'*Q*D1eps;
 Rm = barR;
 
 %% REACHABILITY CHECK of Am,Bm
- lengthAm = length(Am);
- R = ctrb(Am,Bm);
- rankR = rank(R);
- disp('---REACHABILITY CHECK of Am,Bm---');
- if rank(R)==lengthAm
-     disp("FULLY REACHABLE")
- else
+lengthAm = length(Am);
+R = ctrb(Am,Bm);
+rankR = rank(R);
+disp('---REACHABILITY CHECK of Am,Bm---');
+if rank(R)==lengthAm
+    disp("FULLY REACHABLE")
+else
     disp('NOT FULLY REACHABLE')
-    imR = orth(R);              
+    imR = orth(R);
     imRorth = null(R.');         %ker(R)
     invTR = [imR imRorth];      %T_R^-1
-    barA = inv(invTR)*Am*invTR;  
+    barA = inv(invTR)*Am*invTR;
     A22 = barA(rankR+1:end, rankR+1:end);  %non-reachable part of barA
     eA22 = eig(A22);
     %Stabilizabilty Check
-    for i = 1:length(eA22)  
+    for i = 1:length(eA22)
         if real(eA22(i)) >= 0
             disp('-NOT STABILISABLE thanks to eigenvalue number: ');
             disp(i);
         else disp('STABILISABLE');
         end
     end
- end
+end
 
 %% OBSERVABILTY CHECK of Am, Ceps
 O = obsv(Am,Ceps);
@@ -249,10 +250,10 @@ if rankO == length(Am)
     disp('FULLY OBSERVABLE')
 else
     disp('NOT FULLY OBSERVABLE')
-    %DECTABILITY CHECK
+
+    %Detectability Check
     A11 = barA(1:(length(Ceps)-rankO), 1:(length(Ceps)-rankO));  %non-observable part of barA
     eA11= eig(A11);
-    %Stabilizabilty Check
     for i = 1:length(eA11)  
         if real(eA11(i)) >= 0
             disp('-NOT DETECTABLE thanks to eigenvalue number: ');
@@ -274,11 +275,11 @@ Bd = C.';
 Cd = B2.';
 Dd = D2.';
 
-w1max = 500; %maximum road acceleration
-w2max = 70; %maximum lift force (fixed)
+w1max = 500; % maximum road acceleration
+w2max = 70; % maximum lift force (fixed)
 
 std_pot = 0.001; % [m] potentiomenter standard deviation
-std_laser = 0.001; %standard deviation laser
+std_laser = 0.001; % standard deviation laser
 std_acc = 110e-6*sqrt(200); % [m/s^2] accelerometer standard deviation
 
 Qd = diag([w1max^2,w2max^2,0,0,0,0]);
