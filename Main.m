@@ -172,12 +172,12 @@ switch drive_mode
     % not to penalize eps, we put it equal to 1e4
     case 0
         eps1max = 1e4; % susp. deflection
-        eps2max = 1; % susp. speed
+        eps2max = 0.0001; % susp. speed
         eps3max = 1e4; % tire deflection
-        eps4max = 0.1; % tire deflection speed PEN
+        eps4max = 0.0001; % tire deflection speed PEN
         eps5max = 1e6; % actuator force (do not pen)
-        eps6max = 0.1; % integral of the position error PEN 
-        eps7max = 0.01*g; % sprung mass acceleration PEN
+        eps6max = 1; % integral of the position error PEN 
+        eps7max = 0.001*g; % sprung mass acceleration PEN
         eps8max = 1; % sprung mass height 
      
     case 1
@@ -236,7 +236,7 @@ else
         if real(eA22(i)) >= 0
             disp('-NOT STABILISABLE thanks to eigenvalue number: ');
             disp(i);
-        else disp('STABILISABLE');
+        %else disp('STABILISABLE');
         end
     end
 end
