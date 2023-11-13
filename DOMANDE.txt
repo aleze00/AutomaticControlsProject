@@ -1,0 +1,4 @@
+DOMANDE COLLOQUIO 14/11:
+-Ft al momento esprime una forza anche quando la ruota non è a contatto con il terreno, problema?
+-Comportamento accelerazione in OL strano (dovuto ad attuatore)
+-Come valutare oggettivamente la bontà del controllo

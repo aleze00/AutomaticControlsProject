@@ -36,7 +36,7 @@ beta = 1; %1/sec
 mi = 1e-7; % scale coefficient to improve numerical conditioning of P
 gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
 Ap = 3.35e-4; % m^2
-alfa = 4.515e13; % N/m^5
+alfa = 4.515e13; % N/m^5 --- w\ alfa = 4.515e9 Observable and reacheable
 
 % Ps = 10342500; % Pa
 % rho = 865; % Kg/m^3 hydraulic fluid density found on internet
@@ -171,13 +171,13 @@ drive_mode = 0; % 0 = comfort; 1 = off-road; 2 = race
 switch drive_mode 
     % not to penalize eps, we put it equal to 1e4
     case 0
-        eps1max = 1e4; % susp. deflection
-        eps2max = 0.0001; % susp. speed
-        eps3max = 1e4; % tire deflection
-        eps4max = 0.0001; % tire deflection speed PEN
-        eps5max = 1e6; % actuator force (do not pen)
+        eps1max = 1e3; % susp. deflection
+        eps2max = 0.001; % susp. speed
+        eps3max = 1e3; % tire deflection
+        eps4max = 0.001; % tire deflection speed PEN
+        eps5max = 1e4; % actuator force (do not pen)
         eps6max = 1; % integral of the position error PEN 
-        eps7max = 0.001*g; % sprung mass acceleration PEN
+        eps7max = 0.01*g; % sprung mass acceleration PEN
         eps8max = 1; % sprung mass height 
      
     case 1
@@ -234,7 +234,7 @@ else
     %Stabilizabilty Check
     for i = 1:length(eA22)
         if real(eA22(i)) >= 0
-            disp('-NOT STABILISABLE thanks to eigenvalue number: ');
+            disp('NOT STABILISABLE thanks to eigenvalue number: ');
             disp(i);
         %else disp('STABILISABLE');
         end
@@ -245,20 +245,24 @@ end
 O = obsv(Am,Ceps);
 rankO = rank(O);
 kerO = null(O);
-disp('---OBSERVABILTY CHECK of Am, Ceps---');
+disp('---OBSERVABILTY CHECK of Am,Ceps---');
 if rankO == length(Am)
     disp('FULLY OBSERVABLE')
 else
     disp('NOT FULLY OBSERVABLE')
-
+    dectFlag = 1;
     %Detectability Check
     A11 = barA(1:(length(Ceps)-rankO), 1:(length(Ceps)-rankO));  %non-observable part of barA
     eA11= eig(A11);
     for i = 1:length(eA11)  
         if real(eA11(i)) >= 0
             disp('-NOT DETECTABLE thanks to eigenvalue number: ');
+            dectFlag = 0;
             disp(i);
         end
+    end
+    if dectFlag == 1
+        disp("DETECTABLE");
     end
 end
 
