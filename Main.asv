@@ -28,14 +28,14 @@ A_lift = 3;
 Cd_lift = 0.5; 
 rho_lift = 1.225; % kg/m^3
 v = 10; % [m/s] speed of the car
-Lift = -0.5*A_lift*Cd_lift*(v^2)*rho_lift;
+Lift = 0.5*A_lift*Cd_lift*(v^2)*rho_lift;
 
 %% ACTUATOR PARAMETERS
 beta = 1; %1/sec
 mi = 1e-7; % scale coefficient to improve numerical conditioning of P
 gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
 Ap = 3.35e-4; % m^2
-alfa = 4.515e13; % N/m^5 --- w\ alfa = 4.515e9 Observable and reacheable
+alfa = 4.515e9; % N/m^5 --- w\ alfa = 4.515e9 Observable and reacheable
 
 % Ps = 10342500; % Pa
 % rho = 865; % Kg/m^3 hydraulic fluid density found on internet
@@ -180,14 +180,14 @@ switch drive_mode
         eps8max = 1; % sprung mass height 
      
     case 1
-        eps1max = 100; % susp. deflection
-        eps2max = 1; % susp. speed
-        eps3max = 0.0001; % tire deflection PEN 
-        eps4max = 0.0001; % tire speed PEN 
-        eps5max = 1; % actuator force (do not pen)
-        eps6max = 1; % integral of the position error PEN
-        eps7max = 1; % sprung mass acceleration
-        eps8max = 1; % sprung mass height 
+        eps1max = 1e4; % susp. deflection
+        eps2max = 1e4; % susp. speed
+        eps3max = 0.001; % tire deflection PEN 
+        eps4max = 0.001; % tire speed PEN 
+        eps5max = 1e6; % actuator force (do not pen)
+        eps6max = 0.001; % integral of the position error PEN
+        eps7max = 1e4; % sprung mass acceleration
+        eps8max = 1e4; % sprung mass height 
 
      case 2
         eps1max = 0.001; % susp. deflection PEN
@@ -195,15 +195,23 @@ switch drive_mode
         eps3max = 1e5; % tire deflection 
         eps4max = 1e5; % tire speed
         eps5max = 1e6; % actuator force (do not pen)
-        eps6max = 0.0001; % integral of the position error PEN
+        eps6max = 0.001; % integral of the position error PEN
         eps7max = 1; % sprung mass acceleration
         eps8max = 0.001; % sprung mass height PEN
 end
-
+eps1max = 1; % susp. deflection
+        eps2max = 1; % susp. speed
+        eps3max = 1; % tire deflection
+        eps4max = 1; % tire deflection speed PEN
+        eps5max = 1; % actuator force (do not pen) NON CAMBIA NULLA
+        eps6max = 0.1; % integral of the position error PEN 
+        eps7max = 1; % sprung mass acceleration PEN
+        eps8max = 1; % sprung mass height 
+        umax=1;
 Q = inv(8*diag([eps1max^2,eps2max^2,eps3max^2,eps4max^2,eps5max^2, ...
     eps6max^2,eps7max^2,eps8max^2]));
 
-umax = 0.1;  
+        
 R = inv(umax^2);
 barR = R+D1eps.'*Q*D1eps;
 alpha = 0;
@@ -279,7 +287,7 @@ Cd = B2.';
 Dd = D2.';
 
 w1max = 500; % maximum road acceleration
-w2max = 100; % maximum lift force (fixed)
+w2max = 70; % maximum lift force (fixed)
 
 std_pot = 0.001; % [m] potentiomenter standard deviation
 std_laser = 0.001; % standard deviation laser
