@@ -28,7 +28,7 @@ betas = 3000; % damping coefficient
 A_lift = 3;
 Cd_lift = 0.5; 
 rho_lift = 1.225; % kg/m^3
-v = 10; % [m/s] speed of the car
+v = 5; % [m/s] speed of the car
 Lift = 0.5*A_lift*Cd_lift*(v^2)*rho_lift;
 
 %% ACTUATOR PARAMETERS
