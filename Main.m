@@ -8,8 +8,8 @@ Plant = 1;
 
 %% Declaration of the vector dimensions
 n = 5; %states
-p  = 1; %input u
-q  = 3; %output y
+p = 1; %input u
+q = 3; %output y
 m = 1;  %error e 
 nd = 2; %disturbs d
 r = nd + q + m; %exogenous w
@@ -24,8 +24,8 @@ l0t = 0.35; % [m]
 g = 9.81;
 betas = 3000; % damping coefficient 
 
-A_lift = 3;
-Cd_lift = 0.5; 
+A_lift = 3;     % MODIFICARE
+Cd_lift = 0.5;  % MODIFICARE   
 rho_lift = 1.225; % kg/m^3
 v = 10; % [m/s] speed of the car
 Lift = -0.5*A_lift*Cd_lift*(v^2)*rho_lift;
@@ -270,7 +270,7 @@ end
 K = -Km;
 KS = K(:,1:n);
 KI = K(:,n+1:n+m);
-K
+
 %% OBSERVER
 lambda_d = 0;
 Ad = A.';
@@ -281,7 +281,7 @@ Dd = D2.';
 w1max = 500; % maximum road acceleration
 w2max = 100; % maximum lift force (fixed)
 
-std_pot = 0.001; % [m] potentiomenter standard deviation
+std_pot= 0.001; % [m] potentiomenter standard deviation
 std_laser = 0.001; % standard deviation laser
 std_acc = 110e-6*sqrt(200); % [m/s^2] accelerometer standard deviation
 
@@ -304,3 +304,6 @@ BO = B1-KO*D1;
 CO = eye(n);
 DO = zeros(n,q);
 XOinit = x_tilde_init;
+
+%% Saving of the workspace
+save('myActiveSuspensions')
