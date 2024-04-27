@@ -216,7 +216,7 @@ Rm = barR;
 
 %% REACHABILITY CHECK of Am,Bm
 lengthAm = length(Am);
-R = ctrb(Am,Bm);
+R = vpa(ctrb(Am,Bm));
 rankR = rank(R);
 disp('---REACHABILITY CHECK of Am,Bm---');
 if rank(R)==lengthAm
@@ -244,12 +244,14 @@ O = obsv(Am,Ceps);
 rankO = rank(O);
 kerO = null(O);
 disp('---OBSERVABILTY CHECK of Am,Ceps---');
+disp(O)
 if rankO == length(Am)
     disp('FULLY OBSERVABLE')
 else
     disp('NOT FULLY OBSERVABLE')
     dectFlag = 1;
-    %Detectability Check
+    %Detectability Check                                        %
+    %TODO riguardare, barA non è definita
     A11 = barA(1:(length(Ceps)-rankO), 1:(length(Ceps)-rankO));  %non-observable part of barA
     eA11= eig(A11);
     for i = 1:length(eA11)  
