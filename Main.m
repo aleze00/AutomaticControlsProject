@@ -5,7 +5,6 @@ close all
 TimeSpan = 10;
 DT = 1e-4;
 Plant = 1;
-
 %% Declaration of the vector dimensions
 n = 5; %states
 p = 1; %input u
