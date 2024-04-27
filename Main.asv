@@ -5,11 +5,10 @@ close all
 TimeSpan = 10;
 DT = 1e-4;
 Plant = 1;
-
 %% Declaration of the vector dimensions
 n = 5; %states
-p  = 1; %input u
-q  = 3; %output y
+p = 1; %input u
+q = 3; %output y
 m = 1;  %error e 
 nd = 2; %disturbs d
 r = nd + q + m; %exogenous w
@@ -24,18 +23,18 @@ l0t = 0.35; % [m]
 g = 9.81;
 betas = 3000; % damping coefficient 
 
-A_lift = 3;
-Cd_lift = 0.5; 
+A_lift = 3;     % MODIFICARE
+Cd_lift = 0.5;  % MODIFICARE   
 rho_lift = 1.225; % kg/m^3
 v = 10; % [m/s] speed of the car
-Lift = 0.5*A_lift*Cd_lift*(v^2)*rho_lift;
+Lift = -0.5*A_lift*Cd_lift*(v^2)*rho_lift;
 
 %% ACTUATOR PARAMETERS
 beta = 1; %1/sec
 mi = 1e-7; % scale coefficient to improve numerical conditioning of P
 gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
 Ap = 3.35e-4; % m^2
-alfa = 4.515e9; % N/m^5 --- w\ alfa = 4.515e9 Observable and reacheable
+alfa = 4.515e13; % N/m^5 --- w\ alfa = 4.515e9 Observable and reacheable
 
 % Ps = 10342500; % Pa
 % rho = 865; % Kg/m^3 hydraulic fluid density found on internet
@@ -180,14 +179,14 @@ switch drive_mode
         eps8max = 1; % sprung mass height 
      
     case 1
-        eps1max = 1e4; % susp. deflection
-        eps2max = 1e4; % susp. speed
-        eps3max = 0.001; % tire deflection PEN 
-        eps4max = 0.001; % tire speed PEN 
-        eps5max = 1e6; % actuator force (do not pen)
-        eps6max = 0.001; % integral of the position error PEN
-        eps7max = 1e4; % sprung mass acceleration
-        eps8max = 1e4; % sprung mass height 
+        eps1max = 100; % susp. deflection
+        eps2max = 1; % susp. speed
+        eps3max = 0.0001; % tire deflection PEN 
+        eps4max = 0.0001; % tire speed PEN 
+        eps5max = 1; % actuator force (do not pen)
+        eps6max = 1; % integral of the position error PEN
+        eps7max = 1; % sprung mass acceleration
+        eps8max = 1; % sprung mass height 
 
      case 2
         eps1max = 0.001; % susp. deflection PEN
@@ -195,23 +194,15 @@ switch drive_mode
         eps3max = 1e5; % tire deflection 
         eps4max = 1e5; % tire speed
         eps5max = 1e6; % actuator force (do not pen)
-        eps6max = 0.001; % integral of the position error PEN
+        eps6max = 0.0001; % integral of the position error PEN
         eps7max = 1; % sprung mass acceleration
         eps8max = 0.001; % sprung mass height PEN
 end
-eps1max = 1; % susp. deflection
-        eps2max = 1; % susp. speed
-        eps3max = 1; % tire deflection
-        eps4max = 1; % tire deflection speed PEN
-        eps5max = 1; % actuator force (do not pen) NON CAMBIA NULLA
-        eps6max = 0.1; % integral of the position error PEN 
-        eps7max = 1; % sprung mass acceleration PEN
-        eps8max = 1; % sprung mass height 
-        umax=1;
+
 Q = inv(8*diag([eps1max^2,eps2max^2,eps3max^2,eps4max^2,eps5max^2, ...
     eps6max^2,eps7max^2,eps8max^2]));
 
-        
+umax = 0.1;  
 R = inv(umax^2);
 barR = R+D1eps.'*Q*D1eps;
 alpha = 0;
@@ -225,7 +216,7 @@ Rm = barR;
 
 %% REACHABILITY CHECK of Am,Bm
 lengthAm = length(Am);
-R = ctrb(Am,Bm);
+R = vpa(ctrb(Am,Bm));
 rankR = rank(R);
 disp('---REACHABILITY CHECK of Am,Bm---');
 if rank(R)==lengthAm
@@ -249,7 +240,7 @@ else
 end
 
 %% OBSERVABILTY CHECK of Am, Ceps
-O = obsv(Am,Ceps);
+O = vpa(obsv(Am,Ceps));
 rankO = rank(O);
 kerO = null(O);
 disp('---OBSERVABILTY CHECK of Am,Ceps---');
@@ -258,7 +249,8 @@ if rankO == length(Am)
 else
     disp('NOT FULLY OBSERVABLE')
     dectFlag = 1;
-    %Detectability Check
+    %Detectability Check                                        %
+    %TODO riguardare, barA non è definita
     A11 = barA(1:(length(Ceps)-rankO), 1:(length(Ceps)-rankO));  %non-observable part of barA
     eA11= eig(A11);
     for i = 1:length(eA11)  
@@ -278,7 +270,7 @@ end
 K = -Km;
 KS = K(:,1:n);
 KI = K(:,n+1:n+m);
-K
+
 %% OBSERVER
 lambda_d = 0;
 Ad = A.';
@@ -287,9 +279,9 @@ Cd = B2.';
 Dd = D2.';
 
 w1max = 500; % maximum road acceleration
-w2max = 70; % maximum lift force (fixed)
+w2max = 100; % maximum lift force (fixed)
 
-std_pot = 0.001; % [m] potentiomenter standard deviation
+std_pot= 0.001; % [m] potentiomenter standard deviation
 std_laser = 0.001; % standard deviation laser
 std_acc = 110e-6*sqrt(200); % [m/s^2] accelerometer standard deviation
 
@@ -312,3 +304,27 @@ BO = B1-KO*D1;
 CO = eye(n);
 DO = zeros(n,q);
 XOinit = x_tilde_init;
+
+%% Saving of the workspace
+myAs.ks = ks
+myAs.kt = kt
+myAs.mu = mu
+myAs.ms = ms
+myAs.g = g
+myAs.betas = betas
+myAs.A_lift = A_lift
+myAs.Cd_lift = Cd_lift
+myAs.rho_lift = rho_lift
+myAs.v = v
+myAs.beta = beta
+myAs.mi = mi
+myAs.gamma = gamma
+myAs.Ap = Ap
+myAs.alfa = alfa
+myAs.std_pot = std_pot
+myAs.std_acc= std_acc
+myAs.std_laser = std_laser
+myAs.l0s = l0s
+
+% Create an instance of the bus object
+busObject = Simulink.Bus.createObject(myAs);

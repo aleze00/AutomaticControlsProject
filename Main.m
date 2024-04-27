@@ -240,11 +240,10 @@ else
 end
 
 %% OBSERVABILTY CHECK of Am, Ceps
-O = obsv(Am,Ceps);
+O = vpa(obsv(Am,Ceps));
 rankO = rank(O);
 kerO = null(O);
 disp('---OBSERVABILTY CHECK of Am,Ceps---');
-disp(O)
 if rankO == length(Am)
     disp('FULLY OBSERVABLE')
 else
@@ -307,4 +306,11 @@ DO = zeros(n,q);
 XOinit = x_tilde_init;
 
 %% Saving of the workspace
-save('myActiveSuspensions')
+save('myActiveSuspensions');
+myAS = load ('myActiveSuspensions.mat');
+
+myAS = rmfield(myAS, "O");
+myAS = rmfield(myAS, "R");
+
+busInfo = Simulink.Bus.createObject(myAS);
+
