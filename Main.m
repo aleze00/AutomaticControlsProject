@@ -305,12 +305,16 @@ CO = eye(n);
 DO = zeros(n,q);
 XOinit = x_tilde_init;
 
-%% Saving of the workspace
+%% Save all variables in myVars struct
 save('myActiveSuspensions');
-myAS = load ('myActiveSuspensions.mat');
+myVars = load ('myActiveSuspensions.mat');
 
-myAS = rmfield(myAS, "O");
-myAS = rmfield(myAS, "R");
+%% Remove useless variables and create Bus Object
+myVars = rmfield(myVars, "O");
+myVars = rmfield(myVars, "R");
+myVars =  rmfield(myVars, "kerO");
+busInfo = Simulink.Bus.createObject(myVars);
 
-busInfo = Simulink.Bus.createObject(myAS);
-
+%% Run simulation
+mdl = 'NewMODEL';
+out = sim(mdl);
