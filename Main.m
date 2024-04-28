@@ -1,10 +1,10 @@
 clear
 close all
-
-%% Simulation setup
-TimeSpan = 10;
+%% Model Parameters
+mdl = 'NewMODEL';
+TimeSpan = 6;
 DT = 1e-4;
-Plant = 1;
+
 %% Declaration of the vector dimensions
 n = 5; %states
 p = 1; %input u
@@ -29,7 +29,7 @@ rho_lift = 1.225; % kg/m^3
 v = 10; % [m/s] speed of the car
 Lift = -0.5*A_lift*Cd_lift*(v^2)*rho_lift;
 
-%% ACTUATOR PARAMETERS
+%% Actuator parameters
 beta = 1; %1/sec
 mi = 1e-7; % scale coefficient to improve numerical conditioning of P
 gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
@@ -63,8 +63,7 @@ y0 = [x0(1)                                         % suspension lenght (potenti
     
 e0 = y0(1) - r0;
 
-%% LINEARISED PLANT
-
+%% Linearised Plant Matrices
 N = (ms+mu)/(ms*mu);
 
 A = [0 1 0 0 0
@@ -92,7 +91,6 @@ D2 = [0 0 1 0 0 0
     0 1/ms 0 0 1 0];
 
 %% Initial Conditions (randomly different from the equilibrium)
-
 Diseq = 0; % parameter that randomly set the difference from eq position     
 %Diseq = (0.1*(2*rand(1,1)-1));
 
@@ -104,45 +102,46 @@ x_init = [(- g*ms/ks + l0s + Lift/ks) - Diseq
 
 x_tilde_init = x_init - x0; % difference from eq position
 
-%% MATRICES OF e - e(1) = x(1) + vi(1) - r_l
+%% Matrices for: e - e(1) = x(1) + vi(1) - r_l
 Ce = [1 0 0 0 0];  
 
 De1 = 0;
 
 De2 = [0 0 1 0 0 -1];
 
-%% REACHABILITY CHECK for A,B1
+%% Reachability Check for A,B1
+disp('---REACHABILITY CHECK of A,B1---');
 R = ctrb(A,B1);
 if rank(R)==length(R)
-    disp("FULLY REACHABLE")
+    disp("-FULLY REACHABLE")
 else
     rankR = rank(R);
-    disp('NOT FULLY REACHABLE')
+    disp('-NOT FULLY REACHABLE')
     imR = orth(R);              
     imRorth = null(R.');         %ker(R)
     invTR = [imR imRorth];      %T_R^-1
     barA = inv(invTR)*A*invTR;
     A22 = barA(rankR+1:end, rankR+1:end);  %non-reachable part of barA
     eA22 = eig(A22);
-
     %Stabilizabilty Check
     for i = 1:length(eA22)
         if real(eA22(i)) >= 0
-            disp('NOT STABILISABLE')
+            disp('-NOT STABILISABLE')
         end
     end
 end
 
-%% OBSERVABILTY CHECK for A,C
+%% Observability Check for A,C
+disp('---OBSERVABILTY CHECK of A,C---');
 O = obsv(A,C);
 rankO = rank(O);
 if rankO == length(A)
-    disp('FULLY OBSERVABLE')
+    disp('-FULLY OBSERVABLE')
 else
-    disp('NOT FULLY OBSERVABLE')
+    disp('-NOT FULLY OBSERVABLE')
 end
 
-%% STATE FEEDBACK CONTROL + INTEGRAL ACTION
+%% State Feedback control + Integral Action
 Ae = [A zeros(n,m);
       Ce zeros(m,m)];   % dot(x,eta) = Ae*(x,eta)
 
@@ -214,15 +213,15 @@ Qm = Ceps.'*Q*Ceps;
 Sm = Ceps.'*Q*D1eps;
 Rm = barR;
 
-%% REACHABILITY CHECK of Am,Bm
+%% Reachability Check of Am,Bm
 lengthAm = length(Am);
 R = vpa(ctrb(Am,Bm));
 rankR = rank(R);
 disp('---REACHABILITY CHECK of Am,Bm---');
 if rank(R)==lengthAm
-    disp("FULLY REACHABLE")
+    disp("-FULLY REACHABLE")
 else
-    disp('NOT FULLY REACHABLE')
+    disp("-NOT FULLY REACHABLE")
     imR = orth(R);
     imRorth = null(R.');         %ker(R)
     invTR = [imR imRorth];      %T_R^-1
@@ -232,22 +231,21 @@ else
     %Stabilizabilty Check
     for i = 1:length(eA22)
         if real(eA22(i)) >= 0
-            disp('NOT STABILISABLE thanks to eigenvalue number: ');
-            disp(i);
+            disp(strcat("--NOT STABILISABLE thanks to eigenvalue number: ",string(i)));
         %else disp('STABILISABLE');
         end
     end
 end
 
-%% OBSERVABILTY CHECK of Am, Ceps
+%% Observability Check of Am, Ceps
 O = vpa(obsv(Am,Ceps));
 rankO = rank(O);
 kerO = null(O);
 disp('---OBSERVABILTY CHECK of Am,Ceps---');
 if rankO == length(Am)
-    disp('FULLY OBSERVABLE')
+    disp('-FULLY OBSERVABLE')
 else
-    disp('NOT FULLY OBSERVABLE')
+    disp('-NOT FULLY OBSERVABLE')
     dectFlag = 1;
     %Detectability Check                                        %
     %TODO riguardare, barA non è definita
@@ -261,17 +259,17 @@ else
         end
     end
     if dectFlag == 1
-        disp("DETECTABLE");
+        disp("-DETECTABLE");
     end
 end
 
-%% SOLVING RICCATI EQUATION
+%% Solve Riccati Equation
 [X,Km,L] = icare(Am,Bm,Qm,Rm,Sm,Em,Gm);
 K = -Km;
 KS = K(:,1:n);
 KI = K(:,n+1:n+m);
 
-%% OBSERVER
+%% Observer 
 lambda_d = 0;
 Ad = A.';
 Bd = C.';
@@ -307,14 +305,14 @@ XOinit = x_tilde_init;
 
 %% Save all variables in myVars struct
 save('myActiveSuspensions');
-myVars = load ('myActiveSuspensions.mat');
+myVars = load('myActiveSuspensions.mat');
 
 %% Remove useless variables and create Bus Object
 myVars = rmfield(myVars, "O");
 myVars = rmfield(myVars, "R");
 myVars =  rmfield(myVars, "kerO");
+myVars =  rmfield(myVars, "mdl");
 busInfo = Simulink.Bus.createObject(myVars);
 
 %% Run simulation
-mdl = 'NewMODEL';
 out = sim(mdl);
