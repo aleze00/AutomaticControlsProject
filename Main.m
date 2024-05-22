@@ -6,12 +6,12 @@ TimeSpan = 6;
 DT = 1e-4;
 
 %% Declaration of the vector dimensions
-n = 5; %states
-p = 1; %input u
-q = 3; %output y
-m = 1;  %error e 
-nd = 2; %disturbs d
-r = nd + q + m; %exogenous w
+n = 5; % states
+p = 1; % input u
+q = 3; % output y
+m = 1;  % error e 
+nd = 2; % disturbs d
+r = nd + q + m; % exogenous w
 
 %% Plant Parameters
 ks = 29000; % [N/m] spring coefficient
@@ -23,23 +23,18 @@ l0t = 0.35; % [m]
 g = 9.81;
 betas = 3000; % damping coefficient 
 
-A_lift = 3;     % MODIFICARE
-Cd_lift = 0.5;  % MODIFICARE   
-rho_lift = 1.225; % kg/m^3
+A_lift = 3;
+Cd_lift = 0.5;
+rho_lift = 1.225; % [kg/m^3]
 v = 10; % [m/s] speed of the car
 Lift = -0.5*A_lift*Cd_lift*(v^2)*rho_lift;
 
 %% Actuator parameters
-beta = 1; %1/sec
+beta = 1; % [1/sec]
 mi = 1e-7; % scale coefficient to improve numerical conditioning of P
-gamma = 1.545e9; % N/m^(5/2)kg^(1/2)
+gamma = 1.545e9; % [N/m^(5/2)kg^(1/2)]
 Ap = 3.35e-4; % m^2
-alfa = 4.515e13; % N/m^5 --- w\ alfa = 4.515e9 Observable and reacheable
-
-% Ps = 10342500; % Pa
-% rho = 865; % Kg/m^3 hydraulic fluid density found on internet
-% P = pressure drop across pistons
-% x5 = mi*P
+alfa = 4.515e13; % [N/m^5] --- w\ alfa = 4.515e9 Observable and reacheable
 
 %% Linearization initial conditions
 % in order to compute the equilibrium, we put u=0, dot{x} = 0
@@ -91,8 +86,8 @@ D2 = [0 0 1 0 0 0
     0 1/ms 0 0 1 0];
 
 %% Initial Conditions (randomly different from the equilibrium)
-Diseq = 0; % parameter that randomly set the difference from eq position     
-%Diseq = (0.1*(2*rand(1,1)-1));
+Diseq = 0;  
+%Diseq = (0.1*(2*rand(1,1)-1)); % random initial position
 
 x_init = [(- g*ms/ks + l0s + Lift/ks) - Diseq
     Diseq
@@ -118,10 +113,10 @@ else
     rankR = rank(R);
     disp('-NOT FULLY REACHABLE')
     imR = orth(R);              
-    imRorth = null(R.');         %ker(R)
-    invTR = [imR imRorth];      %T_R^-1
+    imRorth = null(R.');         % ker(R)
+    invTR = [imR imRorth];      % T_R^-1
     barA = inv(invTR)*A*invTR;
-    A22 = barA(rankR+1:end, rankR+1:end);  %non-reachable part of barA
+    A22 = barA(rankR+1:end, rankR+1:end);  % non-reachable part of barA
     eA22 = eig(A22);
     %Stabilizabilty Check
     for i = 1:length(eA22)
@@ -223,12 +218,12 @@ if rank(R)==lengthAm
 else
     disp("-NOT FULLY REACHABLE")
     imR = orth(R);
-    imRorth = null(R.');         %ker(R)
-    invTR = [imR imRorth];      %T_R^-1
+    imRorth = null(R.');         % ker(R)
+    invTR = [imR imRorth];      % T_R^-1
     barA = inv(invTR)*Am*invTR;
-    A22 = barA(rankR+1:end, rankR+1:end);  %non-reachable part of barA
+    A22 = barA(rankR+1:end, rankR+1:end);  % non-reachable part of barA
     eA22 = eig(A22);
-    %Stabilizabilty Check
+    % Stabilizabilty Check
     for i = 1:length(eA22)
         if real(eA22(i)) >= 0
             disp(strcat("--NOT STABILISABLE thanks to eigenvalue number: ",string(i)));
@@ -247,7 +242,7 @@ if rankO == length(Am)
 else
     disp('-NOT FULLY OBSERVABLE')
     dectFlag = 1;
-    %Detectability Check                                        %
+    %Detectability Check
     %TODO riguardare, barA non è definita
     A11 = barA(1:(length(Ceps)-rankO), 1:(length(Ceps)-rankO));  %non-observable part of barA
     eA11= eig(A11);
