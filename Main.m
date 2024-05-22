@@ -196,7 +196,7 @@ end
 Q = inv(8*diag([eps1max^2,eps2max^2,eps3max^2,eps4max^2,eps5max^2, ...
     eps6max^2,eps7max^2,eps8max^2]));
 
-umax = 0.1;  
+umax = 4;      
 R = inv(umax^2);
 barR = R+D1eps.'*Q*D1eps;
 alpha = 0;
@@ -221,13 +221,14 @@ else
     imRorth = null(R.');         % ker(R)
     invTR = [imR imRorth];      % T_R^-1
     barA = inv(invTR)*Am*invTR;
-    A22 = barA(rankR+1:end, rankR+1:end);  % non-reachable part of barA
+    A22 = barA(rankR+1:end, rankR+1:end); % non-reachable part of barA
     eA22 = eig(A22);
     % Stabilizabilty Check
     for i = 1:length(eA22)
         if real(eA22(i)) >= 0
             disp(strcat("--NOT STABILISABLE thanks to eigenvalue number: ",string(i)));
-        %else disp('STABILISABLE');
+        else 
+            disp('STABILISABLE');
         end
     end
 end
@@ -243,7 +244,6 @@ else
     disp('-NOT FULLY OBSERVABLE')
     dectFlag = 1;
     %Detectability Check
-    %TODO riguardare, barA non è definita
     A11 = barA(1:(length(Ceps)-rankO), 1:(length(Ceps)-rankO));  %non-observable part of barA
     eA11= eig(A11);
     for i = 1:length(eA11)  
@@ -311,3 +311,9 @@ busInfo = Simulink.Bus.createObject(myVars);
 
 %% Run simulation
 out = sim(mdl);
+
+%% Plot results
+% plot(out.y_OL_NL, 'b', 'DisplayName', 'Non Linear OL Sprung Mass Acceleration');
+% plot(out.y_CL_NL, 'r', 'DisplayName', 'Non Linear CL Sprung Mass Acceleration');
+% plot(out.y_OL_lin, 'k', 'DisplayName', 'Non Linear OL Sprung Mass Acceleration');
+% plot(out.y_OL_lin, 'o', 'DisplayName', 'Non Linear CL Sprung Mass Acceleration');
