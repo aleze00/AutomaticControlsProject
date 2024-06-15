@@ -170,18 +170,16 @@ switch drive_mode
         eps5max = 1e4; % actuator force (do not pen)
         eps6max = 0.1; % integral of the position error PEN 
         eps7max = 0.001; % sprung mass acceleration PEN
-        eps8max = 1; % sprung mass height 
-     
+        eps8max = 1; % sprung mass height
     case 1
         eps1max = 100; % susp. deflection
         eps2max = 1; % susp. speed
         eps3max = 0.0001; % tire deflection PEN 
         eps4max = 0.0001; % tire speed PEN 
-        eps5max = 1; % actuator force (do not pen)
-        eps6max = 1; % integral of the position error PEN
+        eps5max = 1e4; % actuator force (do not pen)
+        eps6max = 0.001; % integral of the position error PEN
         eps7max = 1; % sprung mass acceleration
         eps8max = 1; % sprung mass height 
-
      case 2
         eps1max = 0.001; % susp. deflection PEN
         eps2max = 0.001; % susp. speed PEN
@@ -310,7 +308,7 @@ myVars =  rmfield(myVars, "mdl");
 busInfo = Simulink.Bus.createObject(myVars);
 
 %% Run simulation
-% out = sim(mdl);
+out = sim(mdl);
 
 %% Jordan Form Computation
 [V,Vn,J] = JCF(A);

@@ -1,0 +1,22 @@
+%% Load Results of Simulation
+res0 = load("Results_DriveMode_0.mat");
+res1 = load("Results_DriveMode_1.mat");
+res2 = load("Results_DriveMode_2.mat");
+res11 = load("Results_DriveMode_1_1.mat");
+%% Plot Comparison
+for i = 1 : 8 
+    plotComparison(res0,res1,res2, i);
+end
+function plotComparison(res0,res1,res2,index_eps)
+
+figure();
+plot(res1.out.eps.Time, res1.out.eps.Data(:,index_eps), 'g', 'DisplayName','OffRoad_old');
+plot(res0.out.eps.Time, res0.out.eps.Data(:,index_eps) , 'r', 'DisplayName','Comfort');
+hold on
+
+plot(res2.out.eps.Time, res2.out.eps.Data(:,index_eps), 'b', 'DisplayName','Race');
+legend();
+title(strcat("Comparison for eps_", string(index_eps)));
+hold off;
+
+end
