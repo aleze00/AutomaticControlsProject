@@ -166,11 +166,11 @@ switch drive_mode
         eps1max = 1e3; % susp. deflection
         eps2max = 0.001; % susp. speed
         eps3max = 1e3; % tire deflection
-        eps4max = 0.001; % tire deflection speed PEN
+        eps4max = 0.0001; % tire deflection speed PEN
         eps5max = 1e4; % actuator force (do not pen)
-        eps6max = 0.1; % integral of the position error PEN 
-        eps7max = 0.001; % sprung mass acceleration PEN
-        eps8max = 1; % sprung mass height
+        eps6max = 0.001; % integral of the position error PEN 
+        eps7max = 0.00001; % sprung mass acceleration PEN
+        eps8max = 1e3; % sprung mass height
     case 1
         eps1max = 100; % susp. deflection
         eps2max = 1; % susp. speed
