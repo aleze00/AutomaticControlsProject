@@ -1,7 +1,7 @@
 %% Load Results of Simulation
-res0_NoObs = load("Final0_Comfort.mat");
-res1_NoObs = load("Final1_Comfort.mat");
-res2_NoObs = load("Final2_Comfort.mat");
+res0_NoObs = load("res0race.mat");
+res1_NoObs = load("res8race1.mat");
+res2_NoObs = load("res8race2.mat");
 res3_NoObs = load("Final3_Comfort.mat");
 res4_NoObs = load("Final4_Comfort.mat");
 res5_NoObs = load("Final5_Comfort.mat");
@@ -11,9 +11,22 @@ res8_NoObs = load("Final8_Comfort.mat");
 
 %% Plot Comparison
 for i = 1 : 8 
-    plotComparison(res0_NoObs,res1_NoObs,res2_NoObs,res3_NoObs,res4_NoObs,res5_NoObs,res6_NoObs,res7_NoObs,res8_NoObs, i);
+    plotComparison1(res0_NoObs,res1_NoObs,res2_NoObs, i);
+    % plotComparison(res0_NoObs,res1_NoObs,res2_NoObs,res3_NoObs,res4_NoObs,res5_NoObs,res6_NoObs,res7_NoObs,res8_NoObs, i);
 end
 
+function plotComparison1(res0,res1,res2,index_eps)
+
+figure();
+plot(res0.out.eps.Time, res0.out.eps.Data(:,index_eps), 'r', 'DisplayName','Res0');
+hold on
+plot(res1.out.eps.Time, res1.out.eps.Data(:,index_eps) , 'g', 'DisplayName','Res1');
+plot(res2.out.eps.Time, res2.out.eps.Data(:,index_eps), 'b', 'DisplayName','Res2');
+legend();
+title(strcat("Eps_", string(index_eps)));
+hold off;
+
+end
 
 function plotComparison(res0,res1,res2,res3,res4,res5,res6,res7,res8,index_eps)
 
