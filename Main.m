@@ -159,27 +159,27 @@ Ceps = [1 0 0 0 0 0
 D1eps = [0; 0; 0; 0; 0; 0; 0; 0];
 
 % DRIVE MODES
-drive_mode = 0; % 0 = comfort; 1 = off-road; 2 = race
+drive_mode = 2; % 0 = comfort; 1 = off-road; 2 = race
 switch drive_mode 
     % not to penalize eps, we put it equal to 1e4
     case 0
         eps1max = 1e3; % susp. deflection
         eps2max = 0.001; % susp. speed
         eps3max = 1e3; % tire deflection
-        eps4max = 0.001; % tire deflection speed PEN
+        eps4max = 0.00001; % tire deflection speed PEN
         eps5max = 1e4; % actuator force (do not pen)
-        eps6max = 0.1; % integral of the position error PEN 
-        eps7max = 0.001; % sprung mass acceleration PEN
+        eps6max = 1; % integral of the position error PEN 
+        eps7max = 0.00001; % sprung mass acceleration PEN
         eps8max = 1e3; % sprung mass height
     case 1
-        eps1max = 100; % susp. deflection
-        eps2max = 1; % susp. speed
-        eps3max = 0.0001; % tire deflection PEN 
-        eps4max = 0.0001; % tire speed PEN 
-        eps5max = 1e4; % actuator force (do not pen)
-        eps6max = 0.001; % integral of the position error PEN
-        eps7max = 1; % sprung mass acceleration
-        eps8max = 1; % sprung mass height 
+        eps1max = 1e3; % susp. deflection
+        eps2max = 1e3; % susp. speed
+        eps3max = 0.001; % tire deflection PEN 
+        eps4max = 0.00001; % tire speed PEN 
+        eps5max = 1e6; % actuator force (do not pen)
+        eps6max = 1; % integral of the position error PEN
+        eps7max = 1e3; % sprung mass acceleration
+        eps8max = 1e3; % sprung mass height 
      case 2
         eps1max = 0.001; % susp. deflection PEN
         eps2max = 0.001; % susp. speed PEN
@@ -191,14 +191,7 @@ switch drive_mode
         eps8max = 0.001; % sprung mass height PEN
 end
 
-eps1max = 1e-3; % susp. deflection PEN 1e-5 best
-eps2max = 1e-3; % susp. speed PEN 1 best
-eps3max = 1e5; % tire deflection ok
-eps4max = 1e5; % tire speed ok
-eps5max = 1e6; % actuator force (do not pen) ok
-eps6max = 1e-4; % integral of the position error PEN ok
-eps7max = 1; % sprung mass acceleration ok
-eps8max = 1e-3; % sprung mass height PEN 1e-5 best
+ 
 
 Q = inv(8*diag([eps1max^2,eps2max^2,eps3max^2,eps4max^2,eps5max^2, ...
     eps6max^2,eps7max^2,eps8max^2]));
