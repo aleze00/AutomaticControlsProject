@@ -159,7 +159,7 @@ Ceps = [1 0 0 0 0 0
 D1eps = [0; 0; 0; 0; 0; 0; 0; 0];
 
 % DRIVE MODES
-drive_mode = 2; % 0 = comfort; 1 = off-road; 2 = race
+drive_mode = 1; % 0 = comfort; 1 = off-road; 2 = race
 switch drive_mode 
     % not to penalize eps, we put it equal to 1e4
     case 0
@@ -177,8 +177,8 @@ switch drive_mode
         eps3max = 0.001; % tire deflection PEN 
         eps4max = 0.00001; % tire speed PEN 
         eps5max = 1e6; % actuator force (do not pen)
-        eps6max = 1; % integral of the position error PEN
-        eps7max = 1e3; % sprung mass acceleration
+        eps6max = 0.001; % integral of the position error PEN
+        eps7max = 1e-3; % sprung mass acceleration
         eps8max = 1e3; % sprung mass height 
      case 2
         eps1max = 0.001; % susp. deflection PEN
